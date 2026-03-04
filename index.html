@@ -652,7 +652,7 @@ let materialDensity = {
   "HDPE": 0.95,
   "重包PE": 0.94,
   "坚挺PE": 0.95,
-  "乳白CP": 0.95,
+  "乳白CP2.5C": 0.95,
   "乳白PE": 0.95,
   "抗静电CPP": 0.91,
   "低温PE(DW-105)": 0.92,
@@ -681,34 +681,34 @@ let materialDensity = {
 
 // --- 材料单价（元/kg） ---
 let materialCost = {
-  "BOPP1.9C": 9.4,
-  "BOPP2.3c": 9.05,
-  "BOPP2.5c-3.6c": 8.9,
-  "BOPP热封防雾": 11.9,
-  "CPP": 8.8,
-  "CP铝2.5c": 11.7,
-  "CP铝2c": 12,
-  "OP铝1.8c": 12.8,
-  "OP铝2.5c": 12.5,
-  "KPET": 13.7,
-  "VMPET": 8.8,
-  "PET不易揭膜2.2C，2.5C,3C": 12.5,
+  "BOPP1.9C": 10.2,
+  "BOPP2.3c": 9.7,
+  "BOPP2.5c-3.6c": 9.55,
+  "BOPP热封防雾": 12.4,
+  "CPP": 9.4,
+  "CP铝2.5c": 12.2,
+  "CP铝2c": 12.5,
+  "OP铝1.8c": 13.3,
+  "OP铝2.5c": 13,
+  "KPET": 14.2,
+  "VMPET": 9.8,
+  "PET不易揭膜2.2C，2.5C,3C": 13,
   "PET扭结白膜1.9-2.3": 10.3,
-  "PET扭结铝膜1.9-2.3": 13.5,
-  "PET易揭膜2.2C-3C": 19,
-  "PET热缩膜3C": 13.5,
-  "PET热缩膜4-4.5C": 12.7,
-  "PET白": 7.95,
-  "PE普通": 8.8,
-  "PE-C-L (350ml以内)": 10.8,
-  "PE-M-01 (350ml-4000ml)": 13.2,
-  "PE-D-K(低气味水袋)": 14.2,
-  "WPE-D-K (乳白低气味10kg狗粮)": 15.2,
+  "PET扭结铝膜1.9-2.3": 11.8,
+  "PET易揭膜2.2C-3C": 19.5,
+  "PET热缩膜3C": 14,
+  "PET热缩膜4-4.5C": 13.2,
+  "PET白": 8.6,
+  "PE普通": 9.6,
+  "PE-C-L (350ml以内)": 11.5,
+  "PE-M-01 (350ml-4000ml)": 13.9,
+  "PE-D-K(低气味水袋)": 14.9,
+  "WPE-D-K (乳白低气味10kg狗粮)": 15.9,
   "LLDPE": 12,
   "HDPE": 11,
   "重包PE": 14,
   "坚挺PE": 18,
-  "乳白CP": 11.9,
+  "乳白CP2.5C": 11.9,
   "乳白PE": 10,
   "抗静电CPP": 10.1,
   "低温PE(DW-105)": 12,
@@ -718,21 +718,21 @@ let materialCost = {
   "POF": 12.1,
   "PVC": 10.9,
   "VMPET": 8.95,
-  "佛塑PA": 13.5,
+  "佛塑PA": 17,
   "蒸煮CP": 28,
-  "充气CPP": 9.1,
-  "单面热合2.5c-3.5c": 8.9,
-  "双电尼龙": 15,
-  "双面热合2.5c-3.5c": 9.8,
-  "哑光1.9c": 9.7,
-  "哑光2.5c": 9.2,
-  "哑光PET": 10.3,
-  "尼龙拱挤": 17.3,
-  "易撕PET": 12.5,
-  "流延PE": 10.4,
-  "珠光2.5-3.5c": 8.8,
-  "纯铝": 29.5,
-  "（2.5c以上）CPP": 9.1
+  "充气CPP": 9.7,
+  "单面热合2.5c-3.5c": 9.4,
+  "双电尼龙": 16,
+  "双面热合2.5c-3.5c": 10.3,
+  "哑光1.9c": 10.2,
+  "哑光2.5c": 9.7,
+  "哑光PET": 10.8,
+  "尼龙拱挤": 17.8,
+  "易撕PET": 13,
+  "流延PE": 11.1,
+  "珠光2.5-3.5c": 9.3,
+  "纯铝": 33,
+  "（2.5c以上）CPP": 9.7
 };
 
 
@@ -886,7 +886,7 @@ function createLayerSelection() {
       <option value="HDPE">HDPE</option>
       <option value="重包PE">重包PE</option>
       <option value="坚挺PE">坚挺PE</option>
-      <option value="乳白CP">乳白CP</option>
+      <option value="乳白CP2.5C">乳白CP2.5C</option>
       <option value="乳白PE">乳白PE</option>
       <option value="抗静电CPP">抗静电CPP</option>
       <option value="低温PE(DW-105)">低温PE(DW-105)</option>
@@ -993,7 +993,7 @@ function createLayerSelection2() {
     materialSelect.id = "material_select2_" + i;
     materialSelect.innerHTML = document.getElementById("material_select2_1")?.innerHTML || `
       <option value="" disabled selected hidden>请选择材料</option>
-      <option value="BOPP1.9C">BOPP1.9C</option>
+            <option value="BOPP1.9C">BOPP1.9C</option>
       <option value="BOPP2.3c">BOPP2.3c</option>
       <option value="BOPP2.5c-3.6c">BOPP2.5c-3.6c</option>
       <option value="BOPP热封防雾">BOPP热封防雾</option>
@@ -1005,6 +1005,7 @@ function createLayerSelection2() {
       <option value="KPET">KPET</option>
       <option value="VMPET">VMPET</option>
       <option value="PET不易揭膜2.2C，2.5C,3C">PET不易揭膜2.2C，2.5C,3C</option>
+      <option value="PET扭结白膜1.9-2.3">PET扭结白膜1.9-2.3</option>
       <option value="PET扭结铝膜1.9-2.3">PET扭结铝膜1.9-2.3</option>
       <option value="PET易揭膜2.2C-3C">PET易揭膜2.2C-3C</option>
       <option value="PET热缩膜3C">PET热缩膜3C</option>
@@ -1017,6 +1018,10 @@ function createLayerSelection2() {
       <option value="WPE-D-K (乳白低气味10kg狗粮)">WPE-D-K (乳白低气味10kg狗粮)</option>
       <option value="LLDPE">LLDPE/option>
       <option value="HDPE">HDPE</option>
+      <option value="重包PE">重包PE</option>
+      <option value="坚挺PE">坚挺PE</option>
+      <option value="乳白CP2.5C">乳白CP2.5C</option>
+      <option value="乳白PE">乳白PE</option>
       <option value="抗静电CPP">抗静电CPP</option>
       <option value="低温PE(DW-105)">低温PE(DW-105)</option>
       <option value="PE水膜">PE水膜</option>
