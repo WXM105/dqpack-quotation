@@ -650,6 +650,7 @@ let materialDensity = {
   "WPE-D-K (乳白低气味10kg狗粮)": 0.92,
   "LLDPE": 0.92,
   "HDPE": 0.95,
+  "横向易撕PE": 0.93,
   "重包PE": 0.94,
   "坚挺PE": 0.95,
   "乳白CP2.5C": 0.95,
@@ -664,7 +665,10 @@ let materialDensity = {
   "VMPET": 1.38,
   "佛塑PA": 1.14,
   "蒸煮CP": 0.91,
+  "四级液体蒸煮cp": 0.91,
   "充气CPP": 0.91,
+  "单面热合1.8c": 1,
+  "单面热合2c": 1,
   "单面热合2.5c-3.5c": 1,
   "双电尼龙": 1.14,
   "双面热合2.5c-3.5c": 1,
@@ -674,6 +678,7 @@ let materialDensity = {
   "尼龙拱挤": 1.14,
   "易撕PET": 1.38,
   "流延PE": 0.92,
+  "一级抗冲击液体膜": 0.94,
   "珠光2.5-3.5c": 0.75,
   "纯铝": 2.7,
   "（2.5c以上）CPP": 0.9
@@ -706,6 +711,7 @@ let materialCost = {
   "WPE-D-K (乳白低气味10kg狗粮)": 15.9,
   "LLDPE": 12,
   "HDPE": 11,
+  "横向易撕PE": 15.3,
   "重包PE": 14,
   "坚挺PE": 18,
   "乳白CP2.5C": 11.9,
@@ -720,7 +726,10 @@ let materialCost = {
   "VMPET": 8.95,
   "佛塑PA": 17,
   "蒸煮CP": 28,
+  "四级液体蒸煮cp": 19.1,
   "充气CPP": 9.7,
+  "单面热合1.8c": 10.2,
+  "单面热合2c": 9.9,
   "单面热合2.5c-3.5c": 9.4,
   "双电尼龙": 16,
   "双面热合2.5c-3.5c": 10.3,
@@ -730,6 +739,7 @@ let materialCost = {
   "尼龙拱挤": 17.8,
   "易撕PET": 13,
   "流延PE": 11.1,
+  "一级抗冲击液体膜": 12.2,
   "珠光2.5-3.5c": 9.3,
   "纯铝": 33,
   "（2.5c以上）CPP": 9.7
@@ -884,6 +894,7 @@ function createLayerSelection() {
       <option value="WPE-D-K (乳白低气味10kg狗粮)">WPE-D-K (乳白低气味10kg狗粮)</option>
       <option value="LLDPE">LLDPE/option>
       <option value="HDPE">HDPE</option>
+      <option value="横向易撕PE">横向易撕PE</option>
       <option value="重包PE">重包PE</option>
       <option value="坚挺PE">坚挺PE</option>
       <option value="乳白CP2.5C">乳白CP2.5C</option>
@@ -897,6 +908,7 @@ function createLayerSelection() {
       <option value="PVC">PVC</option>
       <option value="VMPET">VMPET</option>
       <option value="佛塑PA">佛塑PA</option>
+      <option value="四级液体蒸煮cp">四级液体蒸煮cp</option>
       <option value="蒸煮CP">蒸煮CP</option>
       <option value="充气CPP">充气CPP</option>
       <option value="单面热合2.5c-3.5c">单面热合2.5c-3.5c</option>
@@ -909,6 +921,7 @@ function createLayerSelection() {
       <option value="易撕PET">易撕PET</option>
       <option value="流延PE">流延PE</option>
       <option value="珠光2.5-3.5c">珠光2.5-3.5c</option>
+      <option value="一级抗冲击液体膜">一级抗冲击液体膜</option>
       <option value="纯铝">纯铝</option>
       <option value="（2.5c以上）CPP">（2.5c以上）CPP</option>
 `;
@@ -1018,6 +1031,7 @@ function createLayerSelection2() {
       <option value="WPE-D-K (乳白低气味10kg狗粮)">WPE-D-K (乳白低气味10kg狗粮)</option>
       <option value="LLDPE">LLDPE/option>
       <option value="HDPE">HDPE</option>
+      <option value="横向易撕PE">横向易撕PE</option>
       <option value="重包PE">重包PE</option>
       <option value="坚挺PE">坚挺PE</option>
       <option value="乳白CP2.5C">乳白CP2.5C</option>
@@ -1031,8 +1045,11 @@ function createLayerSelection2() {
       <option value="PVC">PVC</option>
       <option value="VMPET">VMPET</option>
       <option value="佛塑PA">佛塑PA</option>
+      <option value="四级液体蒸煮cp">四级液体蒸煮cp</option>
       <option value="蒸煮CP">蒸煮CP</option>
       <option value="充气CPP">充气CPP</option>
+      <option value="单面热合1.8c">单面热合1.8c</option>
+      <option value="单面热合2c">单面热合2c</option>
       <option value="单面热合2.5c-3.5c">单面热合2.5c-3.5c</option>
       <option value="双电尼龙">双电尼龙</option>
       <option value="双面热合2.5c-3.5c">双面热合2.5c-3.5c</option>
@@ -1043,6 +1060,7 @@ function createLayerSelection2() {
       <option value="易撕PET">易撕PET</option>
       <option value="流延PE">流延PE</option>
       <option value="珠光2.5-3.5c">珠光2.5-3.5c</option>
+      <option value="一级抗冲击液体膜">一级抗冲击液体膜</option>
       <option value="纯铝">纯铝</option>
       <option value="（2.5c以上）CPP">（2.5c以上）CPP</option>
 `;
