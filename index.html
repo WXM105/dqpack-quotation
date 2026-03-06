@@ -1317,78 +1317,67 @@ function calculateFinalPrice() {
   else if (calculationType === "卷膜") {
 
     // 计算方式：spec（卷规格）/ size（按尺寸换算）
-    const rollMode = document.getElementById('roll_calc_mode')?.value || 'spec';
-    let area = 0;
+const rollMode = document.getElementById('roll_calc_mode')?.value || 'spec';
 
-    if (rollMode === 'spec') {
-      let width = parseFloat(document.getElementById("film_width").value) / 100;
-      let length = parseFloat(document.getElementById("film_length").value);
-      let rollCount = parseInt(document.getElementById("film_count").value);
-      area = width * length * rollCount;
-    } else {
-      const W = parseFloat(document.getElementById('roll_bag_width_cm').value || "0");
-      const H = parseFloat(document.getElementById('roll_bag_height_cm').value || "0");
-      const B = parseFloat(document.getElementById('roll_bag_bottom_cm').value || "0");
-      const Q = parseFloat(document.getElementById('roll_bag_qty').value || "0");
-      const sideAllow = parseFloat(document.getElementById('roll_side_allow_cm').value || "0");
-      const tbAllow = parseFloat(document.getElementById('roll_tb_allow_cm').value || "0");
+let area = 0; // 总面积 m²
 
-      const filmWidth_cm = 2 * W + sideAllow;
-      const unitLen_cm = H + (2 * B) + tbAllow;
-      area = (filmWidth_cm / 100) * (unitLen_cm / 100) * Q;
-    }
+if (rollMode === 'spec') {
+  // —— 原逻辑：展开宽度×卷长×卷数 ——
+  let width = parseFloat(document.getElementById("film_width").value) / 100; // m
+  let length = parseFloat(document.getElementById("film_length").value);     // m
+  let rollCount = parseInt(document.getElementById("film_count").value);     // 卷数
+  area = width * length * rollCount;
+} else {
+  // —— 按尺寸：客户给成品袋尺寸，只买卷膜 ——
+  const W = parseFloat(document.getElementById('roll_bag_width_cm').value || "0");   // cm
+  const H = parseFloat(document.getElementById('roll_bag_height_cm').value || "0");  // cm
+  const B = parseFloat(document.getElementById('roll_bag_bottom_cm').value || "0");  // cm（单边底）
+  const Q = parseFloat(document.getElementById('roll_bag_qty').value || "0");         // 个
 
-    // 动态层：密度、厚度、材料单价（元/kg）
+  const sideAllow = parseFloat(document.getElementById('roll_side_allow_cm').value || "0"); // cm
+  const tbAllow   = parseFloat(document.getElementById('roll_tb_allow_cm').value || "0");   // cm
+
+  // 展开宽（cm）：2*袋宽 + 侧封/搭接余量
+  const filmWidth_cm = 2 * W + sideAllow;
+
+  // 单个用膜长（cm）：袋高 + 2*底 + 上下余量
+  const unitLen_cm = H + (2 * B) + tbAllow;
+
+  // 总面积 m² = (展开宽m) * (单个长度m) * 数量
+  area = (filmWidth_cm / 100) * (unitLen_cm / 100) * Q;
+}
+
+
     let density = densityEntries2.map(entry => parseFloat(entry.value));
     let thickness = thicknessEntries2.map(entry => parseFloat(entry.value));
-    let matCostArr = materialCostEntries2.map(entry => parseFloat(entry.value));
-
-    // 汇率/币种/利润/含税
+    let materialCost = materialCostEntries2.map(entry => parseFloat(entry.value));
     let exchangeRate = parseFloat(document.getElementById("exchange1_rate_entry").value || "7");
-    let currency = document.getElementById('currency1_entry').value;
+
+let printModeRoll = document.getElementById('print_mode_roll')?.value || "print";
+
+    let colorCount = parseInt(document.getElementById("color_count1").value) || 0;
+    let plateFeeInput = parseFloat(document.getElementById("plate_fee_input1").value || "0");
+    let plateFeeCurrency = document.getElementById("plate_fee_currency1").value;
     let profitMargin = parseFloat(document.getElementById('profit_margin_entry1').value || "1");
     let taxMultiplier = document.getElementById('tax_checkbox1').checked ? 1.13 : 1.0;
+    let currency = document.getElementById('currency1_entry').value;
 
-    // 印刷模式：有/无
-    let printModeRoll = document.getElementById('print_mode_roll')?.value || "print";
+    // 1. 计算总克重（g）
+    let totalWeight = 0;
+    for (let i = 0; i < density.length; i++) {
+        totalWeight += thickness[i] * density[i] * area;
+    }
+    let totalWeightKg = totalWeight / 1000;
 
-    // 版费：颜色数 / 手输 / 币种换算（无印刷时强制为0）
-    let colorCount = parseInt(document.getElementById("color_count1").value) || 0;
-    let plateFeeManual = parseFloat(document.getElementById("plate_fee_input1").value || "0");
-    let plateFeeCurrency = document.getElementById("plate_fee_currency1").value;
-
-    let plateFeeTotal = 0;
-    if (printModeRoll === "none") {
-      plateFeeTotal = 0;
-    } else {
-      if (!isNaN(plateFeeManual) && plateFeeManual > 0) {
-        plateFeeTotal = plateFeeManual;
-        if (plateFeeCurrency === "美元") plateFeeTotal *= exchangeRate;
-      } else {
-        plateFeeTotal = colorCount * 700;
-      }
+    // 2. 材料成本（元）
+    let totalMaterialCost = 0;
+    for (let i = 0; i < density.length; i++) {
+        let layerWeight = thickness[i]  * density[i] * area; // g
+        totalMaterialCost += (layerWeight / 1000) * materialCost[i]; // kg × 单价
     }
 
-    // -------- 1) 计算卷膜总重量（kg）--------
-    // 面积 area（m²）× 厚度(μm) × 密度(g/cm³) = g/m²；再换算 kg
-    let totalWeightKg = density.reduce((sumKg, d, idx) => {
-      const t = thickness[idx];
-      if (isNaN(d) || isNaN(t)) return sumKg;
-      const gsm = t * d; // g/m²
-      return sumKg + (area * gsm) / 1000; // kg
-    }, 0);
+    // 3. 加工费用（全部按 元/kg 来算 + AL 特殊复合）
 
-    // -------- 2) 材料成本（元）--------
-    let materialCostTotal = density.reduce((sum, d, idx) => {
-      const t = thickness[idx];
-      const costPerKg = matCostArr[idx] || 0;
-      if (isNaN(d) || isNaN(t) || isNaN(costPerKg)) return sum;
-
-      const layerWeightKg = (area * (t * d)) / 1000;
-      return sum + layerWeightKg * costPerKg;
-    }, 0);
-
-    // -------- 3) 卷膜工序成本（元）--------
     // —— 第一层重量（印刷层）——
     let firstLayerWeightKg = 0;
     if (density.length > 0 && thickness.length > 0) {
@@ -1403,6 +1392,7 @@ function calculateFinalPrice() {
 
     // —— 印刷成本（第一层）——
 let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG);
+
 
     // —— 复合/自动包装 ——
     // 规则：
@@ -1425,76 +1415,104 @@ let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_P
         }
     }
 
+
     // —— 分切成本：所有层总重量 —— 
     let slittingCost = totalWeightKg * ROLL_SLITTING_COST_PER_KG; // 1 元/kg
 
-    // -------- 4) 版费摊销（按kg展示）--------
+    // —— 卷膜总加工费用（人民币）——
+    let processingCost = printingCost + laminationCost + slittingCost;
+
+    // 4. 版费摊销
+    let plateFeeTotal = 0;
+
+if (printModeRoll === "none") {
+  plateFeeTotal = 0;
+} else {
+  if (plateFeeInput > 0) {
+    if (plateFeeCurrency === "美元") {
+      plateFeeTotal = plateFeeInput * exchangeRate;
+    } else {
+      plateFeeTotal = plateFeeInput;
+    }
+  } else {
+    plateFeeTotal = colorCount * 700;
+  }
+}
+
+
+    // 每kg摊到的版费
     let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
 
-    // -------- 5) FOB/CIF（卷膜：按“总额”加到最后）--------
-    let additionalAmount = 0;
+    // 5. 汇总
+    let subtotal = totalMaterialCost + processingCost;
+    let totalCostAll = subtotal * profitMargin * taxMultiplier;
 
-    // 卷膜 FOB：下拉里带 data-cost（人民币），直接加到总额
-    (function () {
-      const sel = document.getElementById('rf_fob_select');
-      if (!sel || !sel.value) return;
-      const costCNY = parseFloat(sel.selectedOptions[0].dataset.cost || '0') || 0;
-      additionalAmount += costCNY;
-    })();
 
-    // 卷膜 CIF：手输人民币
-    (function () {
-      const cifCheckbox = document.getElementById('rf_cif_checkbox');
-      if (!cifCheckbox || !cifCheckbox.checked) return;
-      const cifVal = parseFloat(document.getElementById('rf_cif_input').value || '0');
-      if (!cifVal) return;
-      additionalAmount += cifVal;
-    })();
+// —— FOB（卷膜）：按票运费 -> 按总重量(kg)分摊（统一先用人民币计算） ——
 
-    // -------- 6) 汇总：得到元/kg & 总额--------
-    // 你的卷膜是“先算总成本，再除以kg得到单价”
-    let totalCostRMB =
-      (materialCostTotal + printingCost + laminationCost + slittingCost + plateFeeTotal) * profitMargin * taxMultiplier
-      + additionalAmount;
+// 1) 取选中的港口运费（人民币/票）
+const rfSel = document.getElementById('rf_fob_select');
+let freightCNY = 0;
+if (rfSel && rfSel.value) {
+    freightCNY = parseFloat(rfSel.selectedOptions[0].dataset.cost || '0') || 0; // ¥/票
+}
 
-    let unitCostRMBPerKg = totalWeightKg > 0 ? (totalCostRMB / totalWeightKg) : 0;
+// 2) 运费按总重量摊到每kg（仍然是人民币）
+const fobPerKgRMB = totalWeightKg > 0 ? (freightCNY / totalWeightKg) : 0;
 
-    // 币种显示（美元则整体换算）
+// —— CIF（卷膜）：CIF 始终按人民币填写 -> 按总重量(kg)分摊 ——
+let cifPerKgRMB = 0;
+let cifJobRMB = 0;  // ★ 新增：整票 CIF 总额
+(function () {
+    const cifCheckbox = document.getElementById('rf_cif_checkbox');
+    if (!cifCheckbox || !cifCheckbox.checked) return;
+
+    const cifVal = parseFloat(document.getElementById('rf_cif_input').value || '0');
+    if (!cifVal) return;
+
+    const cifRMB = cifVal;  // 这里我们约定 rf_cif_input 本来就是以人民币填的
+    cifJobRMB = cifRMB;     // ★ 把整票 CIF 金额存起来
+
+    if (totalWeightKg > 0 && cifRMB > 0) {
+        cifPerKgRMB = cifRMB / totalWeightKg;  // 这一行你可以保留，只是展示用
+    }
+})();
+
+
+// 3) 先在“人民币体系”下算出总成本（元/kg）
+// 先在人民币体系下算出总成本：材料+加工（已乘利润和税）+ 版费 + FOB + CIF
+let totalCostRMB =
+    totalCostAll      // 材料 + 加工 × 利润 × 税
+    + plateFeeTotal   // 版费总额（不再先除以 kg）
+    + freightCNY      // FOB 运费总额（不再先除以 kg）
+    + cifJobRMB;      // CIF 总额（不再先除以 kg）
+
+// 单价（元/kg）= 总成本 ÷ 总重量
+let totalCostPerKgRMB = totalWeightKg > 0
+    ? (totalCostRMB / totalWeightKg)
+    : 0;
+
+
+
+    // 4) 根据币种决定最终显示：元/kg 或 $/kg
+    let totalCostPerKg = totalCostPerKgRMB;
+    if (currency === "美元") {
+        // 这里直接用上面已经读到的 exchangeRate（美元汇率）
+        totalCostPerKg = exchangeRate ? (totalCostPerKgRMB / exchangeRate) : 0;
+    }
+
+
     let unitLabel = currency === "人民币" ? "¥/kg" : "$/kg";
-    let amountLabel = currency === "人民币" ? "¥" : "$";
-    let plateLabel = currency === "人民币" ? "元/kg" : "$/kg";
+    let amountLabel = currency === "人民币" ? "¥" : "$";       // 总额
+    let totalAmount = totalCostPerKg * totalWeightKg;
 
-    let totalAmountShow = totalCostRMB;
-    let unitCostShow = unitCostRMBPerKg;
-    let plateFeePerKgShow = plateFeePerKg;
-
-    if (currency === "美元") {
-      unitCostShow = exchangeRate ? (unitCostRMBPerKg / exchangeRate) : 0;
-      totalAmountShow = exchangeRate ? (totalCostRMB / exchangeRate) : 0;
-      plateFeePerKgShow = exchangeRate ? (plateFeePerKg / exchangeRate) : 0;
-    }
-
-    // -------- 6.5) 计算 1㎡ 单价 --------
-    let unitPriceRMBPerM2 = area > 0 ? (totalCostRMB / area) : 0;
-
-    let unitPricePerM2Show = unitPriceRMBPerM2;
-
-    // 美元显示换算
-    if (currency === "美元") {
-      unitPricePerM2Show = exchangeRate ? (unitPriceRMBPerM2 / exchangeRate) : 0;
-    }
-  
+    // 6. 显示总重量与单价
     document.getElementById("result_label").innerHTML =
-      "计算方式：" + (rollMode === "spec" ? "按卷规格" : "按尺寸换算") + "<br>" +
-      "总重量约为：" + totalWeightKg.toFixed(2) + " kg<br>" +
-      "版费摊销：" + plateFeePerKgShow.toFixed(2) + " " + plateLabel + "<br>" +
-      "卷膜价格（单价）：" + unitCostShow.toFixed(3) + unitLabel + "<br>" +
-      "卷膜价格（㎡）：" + unitPricePerM2Show.toFixed(3) +
-    (currency === "人民币" ? " ¥/㎡" : " $/㎡") + "<br>" +
-      "<b>卷膜总额：</b>" + amountLabel + totalAmountShow.toFixed(2);
-
-    return;
-  }
+    "计算方式：" + (rollMode === "spec" ? "按卷规格" : "按尺寸换算") + "<br>" +
+    "总重量约为：" + totalWeightKg.toFixed(2) + " kg<br>" +
+    "版费摊销：" + plateFeePerKg.toFixed(2) + unitLabel + "<br>" +
+    "卷膜价格（单价）：" + totalCostPerKg.toFixed(3) + unitLabel + "<br>" +
+    "<b>卷膜总额：</b>" + amountLabel + totalAmount.toFixed(2);
 
   /* -----------------------------
      D3. 卷膜张数（估算：按卷膜宽/长/张长/数量）
