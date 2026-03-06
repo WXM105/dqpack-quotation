@@ -1390,8 +1390,7 @@ function calculateFinalPrice() {
 
     // -------- 3) 卷膜工序成本（元）--------
      // —— 印刷成本（第一层）——
-let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG);
-
+    let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG);
 
     // —— 复合/自动包装 ——
     // 规则：
