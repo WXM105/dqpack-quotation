@@ -1404,7 +1404,6 @@ function calculateFinalPrice() {
     // —— 印刷成本（第一层）——
 let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG);
 
-
     // —— 复合/自动包装 ——
     // 规则：
     // 若层材料 = AL → 10000 元/吨 = 10 元/kg
@@ -1426,12 +1425,8 @@ let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_P
         }
     }
 
-
     // —— 分切成本：所有层总重量 —— 
     let slittingCost = totalWeightKg * ROLL_SLITTING_COST_PER_KG; // 1 元/kg
-
-    // —— 卷膜总加工费用（人民币）——
-    let processingCost = printingCost + laminationCost + slittingCost;
 
     // -------- 4) 版费摊销（按kg展示）--------
     let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
@@ -1459,7 +1454,7 @@ let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_P
     // -------- 6) 汇总：得到元/kg & 总额--------
     // 你的卷膜是“先算总成本，再除以kg得到单价”
     let totalCostRMB =
-      (materialCostTotal + printingCostTotal + laminationCostTotal + slittingCostTotal + plateFeeTotal) * profitMargin * taxMultiplier
+      (materialCostTotal + printingCost + laminationCost + slittingCost + plateFeeTotal) * profitMargin * taxMultiplier
       + additionalAmount;
 
     let unitCostRMBPerKg = totalWeightKg > 0 ? (totalCostRMB / totalWeightKg) : 0;
