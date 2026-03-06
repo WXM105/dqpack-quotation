@@ -1389,23 +1389,49 @@ function calculateFinalPrice() {
     }, 0);
 
     // -------- 3) 卷膜工序成本（元）--------
-     // 注意：你原逻辑是：印刷(可选) + 复合(按层数/材料判断) + 分切
-    let printingCostTotal = 0;
-    if (printModeRoll !== "none") {
-      printingCostTotal = totalWeightKg * ROLL_PRINTING_COST_PER_KG;
+    // —— 第一层重量（印刷层）——
+    let firstLayerWeightKg = 0;
+    if (density.length > 0 && thickness.length > 0) {
+        firstLayerWeightKg = thickness[0] * density[0] * area / 1000;
     }
 
-    // 复合：按“卷膜层数 - 1”计算复合次数；如果某次涉及AL则用AL复合成本
-    let laminationCostTotal = 0;
-    const lamTimes = Math.max(0, numLayers2 - 1);
-    for (let i = 0; i < lamTimes; i++) {
-      // 这里保持你常用的判断方式：只要结构里包含AL，就用AL复合成本
-      // （如果你原来是“每次复合看下一层是否AL”，你可以在这里细化）
-      const hasAL = (document.getElementById("material_select2_" + (i + 2))?.value === "AL");
-      laminationCostTotal += totalWeightKg * (hasAL ? ROLL_LAM_AL_COST_PER_KG : ROLL_LAM_AUTO_COST_PER_KG);
+    // —— 各层重量（kg 数组）——
+    let layerWeightKgArr = density.map((d, idx) => {
+        if (isNaN(d) || isNaN(thickness[idx])) return 0;
+        return thickness[idx] * d * area / 1000; // kg
+    });
+
+    // —— 印刷成本（第一层）——
+let printingCost = (printModeRoll === 'none') ? 0 : (firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG);
+
+
+    // —— 复合/自动包装 ——
+    // 规则：
+    // 若层材料 = AL → 10000 元/吨 = 10 元/kg
+    // 否则 → 普通复合 + 自动包装 = 5000 元/吨 = 5 元/kg
+
+    let laminationCost = 0;
+    for (let i = 1; i < density.length; i++) { // 从第二层开始，i 是数组下标（0 基）
+        const w = layerWeightKgArr[i];
+        // 第 i+1 层的材料选择框 id = material_select2_层号
+        const sel = document.getElementById('material_select2_' + (i + 1));
+        const material = sel ? sel.value : "";
+
+        if (material === "AL") {
+            // 卷膜 AL 层复合：10000 元/吨 = 10 元/kg
+            laminationCost += w * ROLL_LAM_AL_COST_PER_KG;
+        } else {
+            // 其他层：复合 + 自动包装：5000 元/吨 = 5 元/kg
+            laminationCost += w * ROLL_LAM_AUTO_COST_PER_KG;
+        }
     }
 
-    let slittingCostTotal = totalWeightKg * ROLL_SLITTING_COST_PER_KG;
+
+    // —— 分切成本：所有层总重量 —— 
+    let slittingCost = totalWeightKg * ROLL_SLITTING_COST_PER_KG; // 1 元/kg
+
+    // —— 卷膜总加工费用（人民币）——
+    let processingCost = printingCost + laminationCost + slittingCost;
 
     // -------- 4) 版费摊销（按kg展示）--------
     let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
