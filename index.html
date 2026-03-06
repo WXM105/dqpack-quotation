@@ -1398,11 +1398,15 @@ function calculateFinalPrice() {
     // 复合：按“卷膜层数 - 1”计算复合次数；如果某次涉及AL则用AL复合成本
     let laminationCostTotal = 0;
     const lamTimes = Math.max(0, numLayers2 - 1);
-    for (let i = 0; i < lamTimes; i++) {
-      // 这里保持你常用的判断方式：只要结构里包含AL，就用AL复合成本
-      // （如果你原来是“每次复合看下一层是否AL”，你可以在这里细化）
-      const hasAL = (document.getElementById("material_select2_" + (i + 2))?.value === "AL");
-      laminationCostTotal += totalWeightKg * (hasAL ? ROLL_LAM_AL_COST_PER_KG : ROLL_LAM_AUTO_COST_PER_KG);
+
+    for (let i = 1; i < numLayers2; i++) {
+    const currentMaterial = document.getElementById("material_select2_" + (i + 1))?.value || "";
+
+      if (currentMaterial === "AL") {
+        laminationCostTotal += totalWeightKg * ROLL_LAM_AL_COST_PER_KG;
+      } else {
+        laminationCostTotal += totalWeightKg * ROLL_LAM_AUTO_COST_PER_KG;
+      }
     }
 
     let slittingCostTotal = totalWeightKg * ROLL_SLITTING_COST_PER_KG;
