@@ -607,7 +607,7 @@ const SLITTING_COST_PER_KG      = 1000 / 1000;   // 1 元/kg
 
 // --- 卷膜工序成本（元/kg） ---
 const ROLL_PRINTING_COST_PER_KG = PRINTING_COST_PER_KG;        // 6 元/kg
-const ROLL_LAM_AUTO_COST_PER_KG = 4000 / 1000;                 // 4 元/kg（复合+自动包装）
+const ROLL_LAM_AUTO_COST_PER_KG = 5000 / 1000;                 // 5 元/kg（复合+自动包装）
 const ROLL_LAM_AL_COST_PER_KG   = LAMINATION_AL_COST_PER_KG;   // 10 元/kg（卷膜 AL）
 const ROLL_SLITTING_COST_PER_KG = SLITTING_COST_PER_KG;        // 1 元/kg
 
@@ -943,7 +943,7 @@ function createLayerSelection() {
 
     let thicknessNotice = document.createElement('span');
     thicknessNotice.style = "color: red; font-weight: bold; display: block; text-align: center;";
-    thicknessNotice.textContent = "例：PET=12μm；1C（丝） = 0.01mm = 10µm";
+    thicknessNotice.textContent = "PET=12μm；0.01mm = 1C（丝）= 10µm";
 
     let materialCostEntry = document.createElement('input');
     materialCostEntry.type = 'hidden';
@@ -1006,7 +1006,7 @@ function createLayerSelection2() {
     materialSelect.id = "material_select2_" + i;
     materialSelect.innerHTML = document.getElementById("material_select2_1")?.innerHTML || `
       <option value="" disabled selected hidden>请选择材料</option>
-            <option value="BOPP1.9C">BOPP1.9C</option>
+      <option value="BOPP1.9C">BOPP1.9C</option>
       <option value="BOPP2.3c">BOPP2.3c</option>
       <option value="BOPP2.5c-3.6c">BOPP2.5c-3.6c</option>
       <option value="BOPP热封防雾">BOPP热封防雾</option>
@@ -1048,8 +1048,6 @@ function createLayerSelection2() {
       <option value="四级液体蒸煮cp">四级液体蒸煮cp</option>
       <option value="蒸煮CP">蒸煮CP</option>
       <option value="充气CPP">充气CPP</option>
-      <option value="单面热合1.8c">单面热合1.8c</option>
-      <option value="单面热合2c">单面热合2c</option>
       <option value="单面热合2.5c-3.5c">单面热合2.5c-3.5c</option>
       <option value="双电尼龙">双电尼龙</option>
       <option value="双面热合2.5c-3.5c">双面热合2.5c-3.5c</option>
@@ -1082,7 +1080,7 @@ function createLayerSelection2() {
 
     let thicknessNotice = document.createElement('span');
     thicknessNotice.style = "color: red; font-weight: bold; display: block; text-align: center;";
-    thicknessNotice.textContent = "例：PET=12μm；1C（丝） = 0.01mm = 10µm";
+    thicknessNotice.textContent = "例：PET=12μm；0.01mm = 1C（丝）= 10µm";
 
     let materialCostEntry = document.createElement('input');
     materialCostEntry.type = 'hidden';
