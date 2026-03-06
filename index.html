@@ -1440,6 +1440,7 @@ if (printModeRoll === "none") {
 }
 
 
+
     // 每kg摊到的版费
     let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
 
@@ -1513,6 +1514,7 @@ let totalCostPerKgRMB = totalWeightKg > 0
     "版费摊销：" + plateFeePerKg.toFixed(2) + unitLabel + "<br>" +
     "卷膜价格（单价）：" + totalCostPerKg.toFixed(3) + unitLabel + "<br>" +
     "<b>卷膜总额：</b>" + amountLabel + totalAmount.toFixed(2);
+  }
 
   /* -----------------------------
      D3. 卷膜张数（估算：按卷膜宽/长/张长/数量）
