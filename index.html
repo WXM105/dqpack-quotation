@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b3d91">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <title>DQ PACK报价计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa; /* 可替换为你的背景图：url("公司厂容.jpg") */
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+        }
+
+        #frame {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px; 
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: calc(100% - 10px);
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result_label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .notice {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .separator {
+            display: block;
+            text-align: center;
+            margin: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+  <!-- =========================================================
+       （可选）密码遮罩：目前保留注释状态
+  ========================================================== -->
+  <!--
+  <div id="password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+       background: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+      <p><strong>请输入密码以继续访问：</strong></p>
+      <input type="password" id="custom-password" placeholder="请输入密码" style="padding: 10px; width: 200px;"
+             onkeydown="if (event.key === 'Enter') checkPassword();">
+      <br><br>
+      <button onclick="checkPassword()">确认</button>
+    </div>
+  </div>
+  -->
+
+  <!-- =========================================================
+       页面容器
+  ========================================================== -->
+  <div id="container">
+    <div id="frame">
+
+      <!-- =========================================================
+           顶部：计算类型切换（控制四个模块显示/隐藏）
+      ========================================================== -->
+      <div class="section">
+        <label for="calculate_type_entry"><b>计算类型：</b></label>
+        <select id="calculate_type_entry" onchange="toggleCalculationType()">
+          <option value="制袋">制袋</option>
+          <option value="卷膜">卷膜</option>
+          <option value="卷膜张数">卷膜张数</option>
+          <option value="卷数估算">卷数估算</option>
+        </select>
+        <br>
+      </div>
+
+      <!-- =========================================================
+           模块 1：制袋（按“袋子尺寸 + 结构层 + 数量”报价）
+      ========================================================== -->
+      <div id="bagging_options">
+
+        <!-- A）袋型与基础尺寸 -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">制袋 - 基础信息</h3>
+
+          <label for="bag_type_select"><b>袋型选择：</b></label>
+          <select id="bag_type_select">
+            <!-- 元/个 -->
+            <option value="0.03">三边封</option>
+            <option value="0.06">四边封</option>
+            <option value="0.03">中封袋</option>
+            <option value="0.06">中封风琴袋</option>
+            <option value="0.07">K型袋</option>
+            <option value="0.06">R型袋</option>
+            <option value="0.04">自立袋</option>
+            <option value="0.08">自立吸嘴袋（普通嘴）</option>
+            <option value="0.08">自立吸嘴袋（斜嘴）</option>
+            <option value="0.04">自立冲孔袋</option>
+            <option value="0.06">八边封袋</option>
+            <option value="0.06">八边封吸嘴袋（普通嘴）</option>
+            <option value="0.04">异形袋（普通）</option>
+            <option value="0.04">异形袋吸嘴袋</option>
+            <option value="0.08">咖啡袋</option>
+            <option value="0.06">高温蒸煮袋</option>
+            <option value="0.05">可回收袋</option>
+          </select>
+          <br>
+
+          <label for="width_entry"><b>袋子的宽度（cm）：</b></label>
+          <input type="text" id="width_entry" placeholder="请输入袋子的宽度">
+          <br>
+
+          <label for="height_entry"><b>袋子的长度（cm）：</b></label>
+          <input type="text" id="height_entry" placeholder="请输入袋子的长度">
+          <br>
+
+          <label for="bottom_entry"><b>袋子的底部增加高度（cm）：</b></label>
+          <label class="notice">无底请输入0（这里输入的是“单边底”，程序内部会×2）</label>
+          <input type="text" id="bottom_entry" placeholder="无底请输入0（这里输入的是单边底）">
+          <br>
+        </div>
+
+        <!-- B）印刷/版费（有印刷才显示） -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">制袋 - 印刷与版费</h3>
+
+          <label for="print_mode_bag"><b>是否印刷：</b></label>
+          <select id="print_mode_bag" onchange="togglePrintFields('bag')">
+            <option value="print" selected>有印刷</option>
+            <option value="none">无印刷</option>
+          </select>
+          <br>
+
+          <!-- 有印刷时显示 -->
+          <div id="bag_print_fields">
+            <label class="notice">快算时不用输入此板块</label>
+            <label for="color_count"><b>印刷颜色数：</b></label>
+            <input type="text" id="color_count" placeholder="例如 4">
+            <br>
+
+            <label for="plate_fee_input"><b>每版费用：</b></label>
+            <input type="text" id="plate_fee_input" placeholder="不填：默认按颜色数 × 700元（你的逻辑）">
+            <br>
+
+            <label for="plate_fee_currency"><b>版费币种：</b></label>
+            <select id="plate_fee_currency">
+              <option value="人民币">人民币</option>
+              <option value="美元">美元</option>
+            </select>
+            <br>
+          </div>
+        </div>
+
+        <!-- C）结构层（动态生成材料/厚度） -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">制袋 - 结构层</h3>
+
+          <label for="num_layers"><b>选择层数：</b></label>
+          <select id="num_layers" onchange="createLayerSelection()">
+            <option value="" disabled selected hidden>请选择层数</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+          <br>
+
+          <!-- 动态层容器（JS往这里塞每一层的材料/厚度） -->
+          <div id="layer_selection"></div>
+
+          <label for="quantity_entry"><b>订货数量（万个）：</b></label>
+          <input type="text" id="quantity_entry" placeholder="请输入数量" value="5">
+          <br>
+        </div>
+
+        <!-- D）附加项（保持你原来的黄色框，只是加注释和缩进） -->
+        <div class="section" style="color: blue; font-size: 16px; background-color: yellow; border: 3px solid black; padding: 8px;">
+          <h3 style="margin: 6px 0;">制袋 - 附加项</h3>
+
+          <label for="coffee_valve_select"><b>咖啡阀</b></label>
+          <select id="coffee_valve_select">
+            <option value="0">无</option>
+            <option value="0.15">A1</option>
+            <option value="0.15">A2</option>
+            <option value="0.22">A3</option>
+            <option value="0.21">A4</option>
+          </select>
+          <br>
+
+          <label for="zipper_checkbox"><b>拉链</b></label>
+          <input type="checkbox" id="zipper_checkbox">
+          <br>
+
+          <label for="handcuffs_checkbox"><b>手扣</b></label>
+          <input type="checkbox" id="handcuffs_checkbox">
+          <br>
+
+          <label for="mouthpiece_select"><b>吸嘴类型:</b></label>
+          <select id="mouthpiece_select">
+            <option value="0">无</option>
+            <option value="0.05">5mm盖子</option>
+            <option value="0.06">6mm盖子</option>
+            <option value="0.082">8.2mm盖子</option>
+            <option value="0.086">8.6mm蒸煮红色蘑菇盖</option>
+            <option value="0.086">8.6mm旋盖</option>
+            <option value="0.086">8.6mm盖子绿色375C</option>
+            <option value="0.13">8.6mm蒸煮蘑菇盖</option>
+            <option value="0.086">8.6mm普通盖子</option>
+            <option value="0.086">8.6mmB1盖子</option>
+            <option value="0.086">8.6mmA2盖子</option>
+            <option value="0.086">8.6mmA3盖子</option>
+            <option value="0.095">9.5mm盖子</option>
+            <option value="0.096">9.6mm盖子</option>
+            <option value="0.10">10mm盖子</option>
+            <option value="0.13">13mm盖子</option>
+            <option value="0.15">15mm盖子</option>
+            <option value="0.16">16mm盖子</option>
+            <option value="0.20">20mm盖子</option>
+            <option value="0.22">22mm盖子</option>
+            <option value="0.33">33mm盖子</option>
+          </select>
+          <br>
+
+          <label for="groove_checkbox"><b>凹槽</b></label>
+          <input type="checkbox" id="groove_checkbox">
+          <br>
+
+          <label for="fob_select"><b>FOB始发港</b></label>
+          <select id="fob_select">
+            <option value="">— 不计FOB —</option>
+            <option value="汕头20柜" data-cost="1800">汕头20柜</option>
+            <option value="汕头40柜" data-cost="2000">汕头40柜</option>
+            <option value="深圳盐田20柜" data-cost="2300">深圳盐田20柜</option>
+            <option value="深圳盐田40柜" data-cost="3300">深圳盐田40柜</option>
+            <option value="深圳蛇口20柜" data-cost="2500">深圳蛇口20柜</option>
+            <option value="深圳蛇口40柜" data-cost="3600">深圳蛇口40柜</option>
+          </select>
+          <br>
+
+          <!-- CIF（制袋） -->
+          <label>
+            <input type="checkbox" id="cif_checkbox" onchange="toggleCIFBag()">
+            <b>CIF</b>
+          </label>
+          <span id="cif_input_wrapper" style="display: none;">
+            <input type="number" id="cif_input" placeholder="CIF总额">
+          </span>
+          <br>
+
+          <label for="tax_checkbox"><b>含税</b></label>
+          <input type="checkbox" id="tax_checkbox">
+          <br>
+        </div>
+
+        <!-- E）报价参数：币种 / 汇率 / 利润率 -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">制袋 - 报价参数</h3>
+
+          <label for="currency_entry"><b>报价币种：</b></label>
+          <select id="currency_entry" onchange="toggleExchangeRate()">
+            <option value="人民币">人民币</option>
+            <option value="美元">美元</option>
+          </select>
+          <br>
+
+          <label for="exchange_rate_entry" id="exchange_rate_label" style="display: none;"><b>美元兑人民币的汇率：</b></label>
+          <input type="text" id="exchange_rate_entry" style="display: none;">
+          <br>
+
+          <label for="profit_margin_entry"><b>利润率：</b></label>
+          <select id="profit_margin_entry">
+            <option value="" disabled selected hidden>请选择利润率</option>
+            <option value="1.0">成本</option>
+            <option value="1.1">10%</option>
+            <option value="1.2">20%</option>
+            <option value="1.3">30%</option>
+            <option value="1.4">40%</option>
+            <option value="1.5">50%</option>
+            <option value="1.6">60%</option>
+            <option value="1.7">70%</option>
+            <option value="1.8">80%</option>
+            <option value="1.9">90%</option>
+            <option value="2.0">100%</option>
+          </select>
+          <br>
+        </div>
+
+      </div><!-- /#bagging_options -->
+
+
+      <!-- =========================================================
+           模块 2：卷膜（按“卷规格”或“按尺寸换算”两种方式）
+      ========================================================== -->
+      <div id="filmprice_options" style="display: none;">
+
+        <h3 style="margin: 10px 0 6px;">卷膜 - 基础信息</h3>
+
+        <!-- A）卷膜计算方式切换 -->
+        <label for="roll_calc_mode"><b>卷膜计算方式：</b></label>
+        <select id="roll_calc_mode" onchange="toggleRollCalcMode()">
+          <option value="spec" selected>按吨数/卷规格</option>
+          <option value="size">按尺寸（客户给袋子尺寸，只要卷膜）</option>
+        </select>
+        <br>
+
+        <!-- A1）按卷规格（原逻辑输入） -->
+        <div id="roll_mode_spec">
+          <label for="film_width"><b>展开宽度（cm）：</b></label>
+          <input type="text" id="film_width" placeholder="例如 70" value="70">
+          <br>
+
+          <label for="film_length"><b>卷膜总长度（m）：</b></label>
+          <input type="text" id="film_length" placeholder="例如 3000" value="3000">
+          <br>
+
+          <label><b>卷数（数量）：</b></label>
+          <input type="number" id="film_count" value="15">
+          <br>
+        </div>
+
+        <!-- A2）按尺寸（新增输入） -->
+        <div id="roll_mode_size" style="display:none">
+          <label><b>成品袋宽（cm）：</b></label>
+          <input type="text" id="roll_bag_width_cm" placeholder="例如 12">
+          <br>
+
+          <label><b>成品袋高（cm）：</b></label>
+          <input type="text" id="roll_bag_height_cm" placeholder="例如 18">
+          <br>
+
+          <label><b>底（cm）：</b></label>
+          <label class="notice">无底请输入0（这里输入的是“单边底”，程序内部会×2）</label>
+          <input type="text" id="roll_bag_bottom_cm" placeholder="例如 4.75">
+          <br>
+
+          <label><b>数量（个）：</b></label>
+          <input type="number" id="roll_bag_qty" placeholder="例如 100000">
+          <br>
+
+          <label><b>侧封/搭接余量（cm）：</b></label>
+          <input type="text" id="roll_side_allow_cm" value="0">
+          <br>
+
+          <label><b>上下封口/切刀余量（cm）：</b></label>
+          <input type="text" id="roll_tb_allow_cm" value="0">
+          <br>
+        </div>
+
+        <!-- B）印刷/版费（有印刷才显示） -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">卷膜 - 印刷与版费</h3>
+
+          <label for="print_mode_roll"><b>是否印刷：</b></label>
+          <select id="print_mode_roll" onchange="togglePrintFields('roll')">
+            <option value="print" selected>有印刷</option>
+            <option value="none">无印刷</option>
+          </select>
+          <br>
+
+          <div id="roll_print_fields">
+            <label class="notice">快算时不用输入此板块</label>
+            <label for="color_count1"><b>印刷颜色数：</b></label>
+            <input type="text" id="color_count1" placeholder="例如 4">
+            <br>
+
+            <label for="plate_fee_input1"><b>每版费用：</b></label>
+            <input type="text" id="plate_fee_input1" placeholder="不填：默认按颜色数 × 700元">
+            <br>
+
+            <label for="plate_fee_currency1"><b>版费币种：</b></label>
+            <select id="plate_fee_currency1">
+              <option value="人民币">人民币</option>
+              <option value="美元">美元</option>
+            </select>
+            <br>
+          </div>
+        </div>
+
+        <!-- C）结构层（动态生成材料/厚度） -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">卷膜 - 结构层</h3>
+
+          <label for="num_layers2"><b>选择层数：</b></label>
+          <select id="num_layers2" onchange="createLayerSelection2()">
+            <option value="" disabled selected hidden>请选择层数</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+          <br>
+
+          <div id="layer_selection2"></div>
+        </div>
+
+        <!-- D）附加项（卷膜） -->
+        <div class="section" style="color: blue; font-size: 16px; background-color: yellow; border: 3px solid black; padding: 8px;">
+          <h3 style="margin: 6px 0;">卷膜 - 附加项</h3>
+
+          <label for="rf_fob_select"><b>FOB始发港（卷膜）</b></label>
+          <select id="rf_fob_select">
+            <option value="">— 不计FOB —</option>
+            <option value="汕头20柜" data-cost="1800">汕头20柜</option>
+            <option value="汕头40柜" data-cost="2000">汕头40柜</option>
+            <option value="深圳盐田20柜" data-cost="2300">深圳盐田20柜</option>
+            <option value="深圳盐田40柜" data-cost="3300">深圳盐田40柜</option>
+            <option value="深圳蛇口20柜" data-cost="2500">深圳蛇口20柜</option>
+            <option value="深圳蛇口40柜" data-cost="3600">深圳蛇口40柜</option>
+          </select>
+          <br>
+
+          <!-- CIF（卷膜） -->
+          <label>
+            <input type="checkbox" id="rf_cif_checkbox" onchange="toggleCIFRoll()">
+            <b>CIF</b>
+          </label>
+          <span id="rf_cif_input_wrapper" style="display: none;">
+            <input type="number" id="rf_cif_input" placeholder="CIF总额">
+          </span>
+          <br>
+
+          <label for="tax_checkbox1"><b>含税</b></label>
+          <input type="checkbox" id="tax_checkbox1">
+          <br>
+        </div>
+
+        <!-- E）报价参数：币种 / 汇率 / 利润率 -->
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">卷膜 - 报价参数</h3>
+
+          <label for="currency1_entry"><b>报价币种：</b></label>
+          <select id="currency1_entry" onchange="toggleExchangeRate1()">
+            <option value="人民币">人民币</option>
+            <option value="美元">美元</option>
+          </select>
+          <br>
+
+          <label for="exchange1_rate_entry" id="exchange1_rate_label" style="display: none;"><b>美元兑人民币的汇率：</b></label>
+          <input type="text" id="exchange1_rate_entry" style="display: none;">
+          <br>
+
+          <label for="profit_margin_entry1"><b>利润率：</b></label>
+          <select id="profit_margin_entry1">
+            <option value="" disabled selected hidden>请选择利润率</option>
+            <option value="1.0">成本</option>
+            <option value="1.1">10%</option>
+            <option value="1.2">20%</option>
+            <option value="1.3">30%</option>
+            <option value="1.4">40%</option>
+            <option value="1.5">50%</option>
+            <option value="1.6">60%</option>
+            <option value="1.7">70%</option>
+            <option value="1.8">80%</option>
+            <option value="1.9">90%</option>
+            <option value="2.0">100%</option>
+          </select>
+          <br>
+        </div>
+
+      </div><!-- /#filmprice_options -->
+
+
+      <!-- =========================================================
+           模块 3：卷膜张数（保持你原 UI，主要是字段分组更清晰）
+      ========================================================== -->
+      <div id="finalSheets_options" style="display: none;">
+        <h3 style="margin: 10px 0 6px;">卷膜张数 - 计算输入</h3>
+
+        <label for="width_entry1"><b>袋子的宽度（cm）：</b></label>
+        <input type="text" id="width_entry1" placeholder="请输入袋子的宽度">
+        <br>
+
+        <label for="height_entry1"><b>袋子的长度（cm）：</b></label>
+        <input type="text" id="height_entry1" placeholder="请输入袋子的长度">
+        <br>
+
+        <label for="bottom_entry1"><b>袋子的底部增加高度（cm）：</b></label>
+        <label class="notice">无底请输入0（这里输入的是“单边底”，程序内部会×2）</label>
+        <input type="text" id="bottom_entry1" placeholder="无底请输入0（单边底）">
+        <br>
+
+        <label for="film_length_entry"><b>膜的长度（m）：</b></label>
+        <input type="text" id="film_length_entry" placeholder="请输入膜的长度">
+        <br>
+
+        <label for="film_width_entry"><b>膜的宽度（cm）：</b></label>
+        <input type="text" id="film_width_entry" placeholder="请输入膜的宽度">
+        <br>
+      </div><!-- /#finalSheets_options -->
+
+
+      <!-- =========================================================
+           模块 4：卷数估算（保持你原 UI）
+      ========================================================== -->
+      <div id="rollCountEstimate_options" style="display: none;">
+        <h3 style="margin: 10px 0 6px;">卷数估算 - 计算输入</h3>
+
+        <label for="total_weight_input"><b>总重量（kg）：</b></label>
+        <input type="text" id="total_weight_input" placeholder="例如 500">
+        <br>
+
+        <label for="film_width_input"><b>膜展开宽度（cm）：</b></label>
+        <input type="text" id="film_width_input" placeholder="例如 70">
+        <br>
+
+        <label for="roll_length_input"><b>每卷长度（m）：</b></label>
+        <input type="text" id="roll_length_input" placeholder="例如 3000">
+        <br>
+
+        <label for="num_layers_roll"><b>选择层数：</b></label>
+        <select id="num_layers_roll" onchange="createLayerSelectionRoll()">
+          <option value="" disabled selected hidden>请选择层数</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+        <br>
+
+        <div id="layer_selection_roll"></div>
+      </div><!-- /#rollCountEstimate_options -->
+
+
+      <!-- =========================================================
+           底部：计算按钮 + 输出结果
+      ========================================================== -->
+      <div class="section" style="margin-top: 12px;">
+        <button onclick="calculateFinalPrice()">计算</button>
+        <br>
+        <div id="result_label"></div>
+      </div>
+
+    </div><!-- /#frame -->
+  </div><!-- /#container -->
+
+<script>
+/* =============================================================================
+   DQ PACK 报价计算器（免密版）
+   维护建议：
+   1) 先看【A. 全局常量/材料字典】→【B. UI切换函数】→【C. 动态层生成】→【D. 主计算函数】
+   2) 所有“显示/隐藏”只在 toggleXXX() 内处理；所有“价格计算”只在 calculateFinalPrice() 内处理
+============================================================================= */
+
+/* =============================================================================
+   A. 全局变量 & 常量（成本、材料密度、材料价格）
+============================================================================= */
+
+// --- 全局：层数记录（动态层生成函数会写入） ---
+let numLayers = 0;
+let numLayers2 = 0;
+
+// --- 制袋工序成本（元/kg） ---
+const PRINTING_COST_PER_KG      = 6000 / 1000;   // 6 元/kg
+const LAMINATION_COST_PER_KG    = 3000 / 1000;   // 3 元/kg
+const LAMINATION_AL_COST_PER_KG = 10000 / 1000;  // 10 元/kg（铝复合）
+const SLITTING_COST_PER_KG      = 1000 / 1000;   // 1 元/kg
+
+// --- 卷膜工序成本（元/kg） ---
+const ROLL_PRINTING_COST_PER_KG = PRINTING_COST_PER_KG;        // 6 元/kg
+const ROLL_LAM_AUTO_COST_PER_KG = 3000 / 1000;                 // 3 元/kg（复合+自动包装）
+const ROLL_LAM_AL_COST_PER_KG   = LAMINATION_AL_COST_PER_KG;   // 10 元/kg（卷膜 AL）
+const ROLL_SLITTING_COST_PER_KG = SLITTING_COST_PER_KG;        // 1 元/kg
+
+// --- 动态层输入缓存（由 createLayerSelection / createLayerSelection2 填充） ---
+let densityEntries = [];
+let thicknessEntries = [];
+let materialCostEntries = [];     // 制袋：存“材料+工序”的元/kg（隐藏input）
+
+let densityEntries2 = [];
+let thicknessEntries2 = [];
+let materialCostEntries2 = [];    // 卷膜：只存材料元/kg（隐藏input）
+
+let densityEntriesRoll = [];      // 卷数估算模块用
+let thicknessEntriesRoll = [];
+
+// --- 材料密度（g/cm³） ---
+let materialDensity = {
+  "BOPP1.9C": 0.92,
+  "BOPP2.3c": 0.9,
+  "BOPP2.5c-3.6c": 0.9,
+  "BOPP热封防雾": 0.91,
+  "CPP": 0.91,
+  "CP铝2.5c": 2.7,
+  "CP铝2c": 2.7,
+  "OP铝1.8c": 0.91,
+  "OP铝2.5c": 0.91,
+  "KPET": 1.4,
+  "VMPET": 1.38,
+  "PET不易揭膜2.2C，2.5C,3C": 1.38,
+  "PET扭结白膜1.9-2.3": 1.38,
+  "PET扭结铝膜1.9-2.3": 2.7,
+  "PET易揭膜2.2C-3C": 1.38,
+  "PET热缩膜3C": 1.38,
+  "PET热缩膜4-4.5C": 1.38,
+  "PET白": 1.38,
+  "PE普通": 0.92,
+  "RPE": 0.935,
+  "PE-C-L (350ml以内)": 0.92,
+  "PE-M-01 (350ml-4000ml)": 0.92,
+  "PE-D-K(低气味水袋)": 0.92,
+  "WPE-D-K (乳白低气味10kg狗粮)": 0.92,
+  "LLDPE": 0.92,
+  "HDPE": 0.95,
+  "横向易撕PE": 0.93,
+  "重包PE": 0.94,
+  "坚挺PE": 0.95,
+  "乳白CP2.5C": 0.95,
+  "乳白PE": 0.95,
+  "抗静电CPP": 0.91,
+  "低温PE(DW-105)": 0.92,
+  "PE水膜": 0.93,
+  "PE热缩": 0.92,
+  "PE膜筒": 0.92,
+  "POF": 1,
+  "PVC": 1.4,
+  "VMPET": 1.38,
+  "佛塑PA": 1.14,
+  "蒸煮CP": 0.91,
+  "四级液体蒸煮cp": 0.91,
+  "充气CPP": 0.91,
+  "单面热合1.8c": 1,
+  "单面热合2c": 1,
+  "单面热合2.5c-3.5c": 1,
+  "双电尼龙": 1.14,
+  "双面热合2.5c-3.5c": 1,
+  "哑光1.9c": 1.38,
+  "哑光2.5c": 1.38,
+  "哑光PET": 1.38,
+  "尼龙拱挤": 1.14,
+  "易撕PET": 1.38,
+  "流延PE": 0.92,
+  "一级抗冲击液体膜": 0.94,
+  "珠光2.5-3.5c": 0.75,
+  "AL": 2.7,
+  "（2.5c以上）CPP": 0.9
+};
+
+// --- 材料单价（元/kg） ---
+let materialCost = {
+  "BOPP1.9C": 10.2,
+  "BOPP2.3c": 9.7,
+  "BOPP2.5c-3.6c": 9.55,
+  "BOPP热封防雾": 12.4,
+  "CPP": 9.4,
+  "CP铝2.5c": 12.2,
+  "CP铝2c": 12.5,
+  "OP铝1.8c": 13.3,
+  "OP铝2.5c": 13,
+  "KPET": 14.2,
+  "VMPET": 9.8,
+  "PET不易揭膜2.2C，2.5C,3C": 13,
+  "PET扭结白膜1.9-2.3": 10.3,
+  "PET扭结铝膜1.9-2.3": 11.8,
+  "PET易揭膜2.2C-3C": 19.5,
+  "PET热缩膜3C": 14,
+  "PET热缩膜4-4.5C": 13.2,
+  "PET白": 9,
+  "PE普通": 10,
+  "RPE": 13,
+  "PE-C-L (350ml以内)": 11.5,
+  "PE-M-01 (350ml-4000ml)": 13.9,
+  "PE-D-K(低气味水袋)": 14.9,
+  "WPE-D-K (乳白低气味10kg狗粮)": 15.9,
+  "LLDPE": 12,
+  "HDPE": 11,
+  "横向易撕PE": 15.3,
+  "重包PE": 14,
+  "坚挺PE": 18,
+  "乳白CP2.5C": 11.9,
+  "乳白PE": 10,
+  "抗静电CPP": 10.1,
+  "低温PE(DW-105)": 12,
+  "PE水膜": 9,
+  "PE热缩": 11.7,
+  "PE膜筒": 11.7,
+  "POF": 12.1,
+  "PVC": 10.9,
+  "VMPET": 8.95,
+  "佛塑PA": 18,
+  "蒸煮CP": 28,
+  "四级液体蒸煮cp": 19.1,
+  "充气CPP": 9.7,
+  "单面热合1.8c": 10.2,
+  "单面热合2c": 9.9,
+  "单面热合2.5c-3.5c": 9.4,
+  "双电尼龙": 16,
+  "双面热合2.5c-3.5c": 10.3,
+  "哑光1.9c": 10.2,
+  "哑光2.5c": 9.7,
+  "哑光PET": 10.8,
+  "尼龙拱挤": 17.8,
+  "易撕PET": 13,
+  "流延PE": 11.1,
+  "一级抗冲击液体膜": 12.2,
+  "珠光2.5-3.5c": 9.3,
+  "AL": 30,
+  "（2.5c以上）CPP": 9.7
+};
+
+
+/* =============================================================================
+   B. UI显示/隐藏（币种、CIF、印刷字段、卷膜计算方式、计算类型切换）
+============================================================================= */
+
+// --- 显示/隐藏：制袋印刷字段 & 刷新第一层“材料+工序”单价 ---
+function togglePrintFields(type) {
+  if (type === 'bag') {
+    const mode = document.getElementById('print_mode_bag')?.value || 'print';
+    const box = document.getElementById('bag_print_fields');
+    if (box) box.style.display = (mode === 'none') ? 'none' : 'block';
+    refreshBagLayerCostsOnly(); // 关键：切换“是否印刷”时刷新第一层6元/kg
+  }
+
+  if (type === 'roll') {
+    const mode = document.getElementById('print_mode_roll')?.value || 'print';
+    const box = document.getElementById('roll_print_fields');
+    if (box) box.style.display = (mode === 'none') ? 'none' : 'block';
+  }
+}
+
+// --- 卷膜：切换“按卷规格 / 按尺寸”显示区域 ---
+function toggleRollCalcMode() {
+  const mode = document.getElementById('roll_calc_mode')?.value || 'spec';
+  const boxSpec = document.getElementById('roll_mode_spec');
+  const boxSize = document.getElementById('roll_mode_size');
+  if (boxSpec) boxSpec.style.display = (mode === 'spec') ? 'block' : 'none';
+  if (boxSize) boxSize.style.display = (mode === 'size') ? 'block' : 'none';
+}
+
+// --- 切换：制袋报价币种时显示汇率输入框 ---
+function toggleExchangeRate() {
+  let currencySelect = document.getElementById("currency_entry");
+  let exchangeRateLabel = document.getElementById("exchange_rate_label");
+  let exchangeRateInput = document.getElementById("exchange_rate_entry");
+  if (currencySelect.value === "美元") {
+    exchangeRateLabel.style.display = "block";
+    exchangeRateInput.style.display = "block";
+  } else {
+    exchangeRateLabel.style.display = "none";
+    exchangeRateInput.style.display = "none";
+  }
+}
+
+// --- 切换：卷膜报价币种时显示汇率输入框 ---
+function toggleExchangeRate1() {
+  let currencySelect = document.getElementById("currency1_entry");
+  let exchangeRateLabel = document.getElementById("exchange1_rate_label");
+  let exchangeRateInput = document.getElementById("exchange1_rate_entry");
+  if (currencySelect.value === "美元") {
+    exchangeRateLabel.style.display = "block";
+    exchangeRateInput.style.display = "block";
+  } else {
+    exchangeRateLabel.style.display = "none";
+    exchangeRateInput.style.display = "none";
+  }
+}
+
+// --- CIF 输入框显示/隐藏（制袋） ---
+function toggleCIFBag() {
+  const wrapper = document.getElementById('cif_input_wrapper');
+  const checkbox = document.getElementById('cif_checkbox');
+  if (!wrapper || !checkbox) return;
+  wrapper.style.display = checkbox.checked ? 'inline-block' : 'none';
+}
+
+// --- CIF 输入框显示/隐藏（卷膜） ---
+function toggleCIFRoll() {
+  const wrapper = document.getElementById('rf_cif_input_wrapper');
+  const checkbox = document.getElementById('rf_cif_checkbox');
+  if (!wrapper || !checkbox) return;
+  wrapper.style.display = checkbox.checked ? 'inline-block' : 'none';
+}
+
+// --- 主界面：计算类型切换（制袋/卷膜/卷膜张数/卷数估算） ---
+function toggleCalculationType() {
+  let calculationType = document.getElementById("calculate_type_entry").value;
+  let baggingOptions = document.getElementById("bagging_options");
+  let finalSheetsOptions = document.getElementById("finalSheets_options");
+  let filmpriceOptions = document.getElementById("filmprice_options");
+  let rollCountEstimateOptions = document.getElementById("rollCountEstimate_options");
+
+  // 先全部隐藏（避免状态残留）
+  baggingOptions.style.display = "none";
+  finalSheetsOptions.style.display = "none";
+  filmpriceOptions.style.display = "none";
+  rollCountEstimateOptions.style.display = "none";
+
+  // 再按类型显示
+  if (calculationType === "制袋") {
+    baggingOptions.style.display = "block";
+  } else if (calculationType === "卷膜") {
+    filmpriceOptions.style.display = "block";
+    toggleRollCalcMode(); // 保证显示与当前选项一致
+  } else if (calculationType === "卷膜张数") {
+    finalSheetsOptions.style.display = "block";
+  } else if (calculationType === "卷数估算") {
+    rollCountEstimateOptions.style.display = "block";
+  }
+}
+
+
+/* =============================================================================
+   C. 动态层选择：制袋层 / 卷膜层 / 卷数估算层
+============================================================================= */
+
+// --- 制袋：按层生成材料选择；并把“材料+工序”元/kg 存入隐藏输入 ---
+function createLayerSelection() {
+  densityEntries = [];
+  thicknessEntries = [];
+  materialCostEntries = [];
+
+  numLayers = parseInt(document.getElementById('num_layers').value);
+  let layerSelectionDiv = document.getElementById('layer_selection');
+  layerSelectionDiv.innerHTML = '';
+
+  for (let i = 1; i <= numLayers; i++) {
+    let layerLabel = document.createElement('label');
+    layerLabel.innerHTML = "<b>第 " + i + " 层</b>";
+
+    let materialSelect = document.createElement('select');
+    materialSelect.id = "material_select_" + i;
+    materialSelect.innerHTML = document.getElementById("material_select_1")?.innerHTML || `
+      <option value="" disabled selected hidden>请选择材料</option>
+      <option value="BOPP1.9C">BOPP1.9C</option>
+      <option value="BOPP2.3c">BOPP2.3c</option>
+      <option value="BOPP2.5c-3.6c">BOPP2.5c-3.6c</option>
+      <option value="BOPP热封防雾">BOPP热封防雾</option>
+      <option value="CPP">CPP</option>
+      <option value="CP铝2.5c">CP铝2.5c</option>
+      <option value="CP铝2c">CP铝2c</option>
+      <option value="OP铝1.8c">OP铝1.8c</option>
+      <option value="OP铝2.5c">OP铝2.5c</option>
+      <option value="KPET">KPET</option>
+      <option value="VMPET">VMPET</option>
+      <option value="PET不易揭膜2.2C，2.5C,3C">PET不易揭膜2.2C，2.5C,3C</option>
+      <option value="PET扭结白膜1.9-2.3">PET扭结白膜1.9-2.3</option>
+      <option value="PET扭结铝膜1.9-2.3">PET扭结铝膜1.9-2.3</option>
+      <option value="PET易揭膜2.2C-3C">PET易揭膜2.2C-3C</option>
+      <option value="PET热缩膜3C">PET热缩膜3C</option>
+      <option value="PET热缩膜4-4.5C">PET热缩膜4-4.5C</option>
+      <option value="PET白">PET白</option>
+      <option value="PE普通">PE普通</option>
+      <option value="RPE">RPE</option>
+      <option value="PE-C-L (350ml以内)">PE-C-L (350ml以内)</option>
+      <option value="PE-M-01 (350ml-4000ml)">PE-M-01 (350ml-4000ml)</option>
+      <option value="PE-D-K(低气味水袋)">PE-D-K(低气味水袋)</option>
+      <option value="WPE-D-K (乳白低气味10kg狗粮)">WPE-D-K (乳白低气味10kg狗粮)</option>
+      <option value="LLDPE">LLDPE</option>
+      <option value="HDPE">HDPE</option>
+      <option value="横向易撕PE">横向易撕PE</option>
+      <option value="重包PE">重包PE</option>
+      <option value="坚挺PE">坚挺PE</option>
+      <option value="乳白CP2.5C">乳白CP2.5C</option>
+      <option value="乳白PE">乳白PE</option>
+      <option value="抗静电CPP">抗静电CPP</option>
+      <option value="低温PE(DW-105)">低温PE(DW-105)</option>
+      <option value="PE水膜">PE水膜</option>
+      <option value="PE热缩">PE热缩</option>
+      <option value="PE膜筒">PE膜筒</option>
+      <option value="POF">POF</option>
+      <option value="PVC">PVC</option>
+      <option value="VMPET">VMPET</option>
+      <option value="佛塑PA">佛塑PA</option>
+      <option value="四级液体蒸煮cp">四级液体蒸煮cp</option>
+      <option value="蒸煮CP">蒸煮CP</option>
+      <option value="充气CPP">充气CPP</option>
+      <option value="单面热合2.5c-3.5c">单面热合2.5c-3.5c</option>
+      <option value="双电尼龙">双电尼龙</option>
+      <option value="双面热合2.5c-3.5c">双面热合2.5c-3.5c</option>
+      <option value="哑光1.9c">哑光1.9c</option>
+      <option value="哑光2.5c">哑光2.5c</option>
+      <option value="哑光PET">哑光PET</option>
+      <option value="尼龙拱挤">尼龙拱挤</option>
+      <option value="易撕PET">易撕PET</option>
+      <option value="流延PE">流延PE</option>
+      <option value="珠光2.5-3.5c">珠光2.5-3.5c</option>
+      <option value="一级抗冲击液体膜">一级抗冲击液体膜</option>
+      <option value="AL">AL</option>
+      <option value="（2.5c以上）CPP">（2.5c以上）CPP</option>
+`;
+
+    let densityEntry = document.createElement('input');
+    densityEntry.type = 'hidden';
+    densityEntry.readOnly = true;
+    densityEntry.id = "density_entry_" + i;
+    densityEntries.push(densityEntry);
+
+    let thicknessLabel = document.createElement('label');
+    thicknessLabel.innerHTML = "<b>材料厚度(micron)：</b>";
+    let thicknessEntry = document.createElement('input');
+    thicknessEntry.type = 'text';
+    thicknessEntry.id = 'thickness_entry_' + i;
+    thicknessEntry.placeholder = '输入材料厚度';
+    thicknessEntry.required = true;
+    thicknessEntries.push(thicknessEntry);
+
+    let thicknessNotice = document.createElement('span');
+    thicknessNotice.style = "color: red; font-weight: bold; display: block; text-align: center;";
+    thicknessNotice.textContent = "PET=12μm；0.01mm = 1C（丝）= 10µm";
+
+    let materialCostEntry = document.createElement('input');
+    materialCostEntry.type = 'hidden';
+    materialCostEntry.readOnly = true;
+    materialCostEntry.id = "materialCost_entry_" + i;
+    materialCostEntries.push(materialCostEntry);
+
+    // --- 制袋：材料选择后，写入密度 + 写入“材料+工序”元/kg ---
+    materialSelect.addEventListener('change', function () {
+      let selectedMaterial = this.value;
+      let currentLayer = parseInt(this.id.split("_")[2]); // 第几层（1开始）
+
+      // 1) 密度
+      document.getElementById('density_entry_' + currentLayer).value = materialDensity[selectedMaterial];
+
+      // 2) 材料单价（元/kg）
+      const baseMaterialCostPerKg = materialCost[selectedMaterial] || 0;
+
+      // 3) 工序成本（元/kg）
+      let processCostPerKg = 0;
+
+      if (currentLayer === 1) {
+        const mode = document.getElementById('print_mode_bag')?.value || 'print';
+        if (mode !== 'none') processCostPerKg += PRINTING_COST_PER_KG; // 6元/kg
+      } else {
+        if (selectedMaterial === "AL") processCostPerKg += LAMINATION_AL_COST_PER_KG;
+        else processCostPerKg += LAMINATION_COST_PER_KG;
+      }
+
+      // 4) 保存“材料+工序”元/kg
+      const totalCostPerKg = baseMaterialCostPerKg + processCostPerKg;
+      document.getElementById('materialCost_entry_' + currentLayer).value = totalCostPerKg.toFixed(4);
+    });
+
+    layerSelectionDiv.appendChild(layerLabel);
+    layerSelectionDiv.appendChild(materialSelect);
+    layerSelectionDiv.appendChild(densityEntry);
+    layerSelectionDiv.appendChild(thicknessLabel);
+    layerSelectionDiv.appendChild(thicknessEntry);
+    layerSelectionDiv.appendChild(thicknessNotice);
+    layerSelectionDiv.appendChild(materialCostEntry);
+  }
+}
+
+// --- 卷膜：按层生成材料选择；只存“材料元/kg”（工序在 calculateFinalPrice 里算） ---
+function createLayerSelection2() {
+  densityEntries2 = [];
+  thicknessEntries2 = [];
+  materialCostEntries2 = [];
+
+  numLayers2 = parseInt(document.getElementById('num_layers2').value);
+  let layerSelectionDiv = document.getElementById('layer_selection2');
+  layerSelectionDiv.innerHTML = '';
+
+  for (let i = 1; i <= numLayers2; i++) {
+    let layerLabel = document.createElement('label');
+    layerLabel.innerHTML = "<b>第 " + i + " 层</b>";
+
+    let materialSelect = document.createElement('select');
+    materialSelect.id = "material_select2_" + i;
+    materialSelect.innerHTML = document.getElementById("material_select2_1")?.innerHTML || `
+      <option value="" disabled selected hidden>请选择材料</option>
+      <option value="BOPP1.9C">BOPP1.9C</option>
+      <option value="BOPP2.3c">BOPP2.3c</option>
+      <option value="BOPP2.5c-3.6c">BOPP2.5c-3.6c</option>
+      <option value="BOPP热封防雾">BOPP热封防雾</option>
+      <option value="CPP">CPP</option>
+      <option value="CP铝2.5c">CP铝2.5c</option>
+      <option value="CP铝2c">CP铝2c</option>
+      <option value="OP铝1.8c">OP铝1.8c</option>
+      <option value="OP铝2.5c">OP铝2.5c</option>
+      <option value="KPET">KPET</option>
+      <option value="VMPET">VMPET</option>
+      <option value="PET不易揭膜2.2C，2.5C,3C">PET不易揭膜2.2C，2.5C,3C</option>
+      <option value="PET扭结白膜1.9-2.3">PET扭结白膜1.9-2.3</option>
+      <option value="PET扭结铝膜1.9-2.3">PET扭结铝膜1.9-2.3</option>
+      <option value="PET易揭膜2.2C-3C">PET易揭膜2.2C-3C</option>
+      <option value="PET热缩膜3C">PET热缩膜3C</option>
+      <option value="PET热缩膜4-4.5C">PET热缩膜4-4.5C</option>
+      <option value="PET白">PET白</option>
+      <option value="PE普通">PE普通</option>
+      <option value="RPE">RPE</option>
+      <option value="PE-C-L (350ml以内)">PE-C-L (350ml以内)</option>
+      <option value="PE-M-01 (350ml-4000ml)">PE-M-01 (350ml-4000ml)</option>
+      <option value="PE-D-K(低气味水袋)">PE-D-K(低气味水袋)</option>
+      <option value="WPE-D-K (乳白低气味10kg狗粮)">WPE-D-K (乳白低气味10kg狗粮)</option>
+      <option value="LLDPE">LLDPE</option>
+      <option value="HDPE">HDPE</option>
+      <option value="横向易撕PE">横向易撕PE</option>
+      <option value="重包PE">重包PE</option>
+      <option value="坚挺PE">坚挺PE</option>
+      <option value="乳白CP2.5C">乳白CP2.5C</option>
+      <option value="乳白PE">乳白PE</option>
+      <option value="抗静电CPP">抗静电CPP</option>
+      <option value="低温PE(DW-105)">低温PE(DW-105)</option>
+      <option value="PE水膜">PE水膜</option>
+      <option value="PE热缩">PE热缩</option>
+      <option value="PE膜筒">PE膜筒</option>
+      <option value="POF">POF</option>
+      <option value="PVC">PVC</option>
+      <option value="VMPET">VMPET</option>
+      <option value="佛塑PA">佛塑PA</option>
+      <option value="四级液体蒸煮cp">四级液体蒸煮cp</option>
+      <option value="蒸煮CP">蒸煮CP</option>
+      <option value="充气CPP">充气CPP</option>
+      <option value="单面热合2.5c-3.5c">单面热合2.5c-3.5c</option>
+      <option value="双电尼龙">双电尼龙</option>
+      <option value="双面热合2.5c-3.5c">双面热合2.5c-3.5c</option>
+      <option value="哑光1.9c">哑光1.9c</option>
+      <option value="哑光2.5c">哑光2.5c</option>
+      <option value="哑光PET">哑光PET</option>
+      <option value="尼龙拱挤">尼龙拱挤</option>
+      <option value="易撕PET">易撕PET</option>
+      <option value="流延PE">流延PE</option>
+      <option value="珠光2.5-3.5c">珠光2.5-3.5c</option>
+      <option value="一级抗冲击液体膜">一级抗冲击液体膜</option>
+      <option value="AL">AL</option>
+      <option value="（2.5c以上）CPP">（2.5c以上）CPP</option>
+`;
+
+    let densityEntry = document.createElement('input');
+    densityEntry.type = 'hidden';
+    densityEntry.readOnly = true;
+    densityEntry.id = "density_entry2_" + i;
+    densityEntries2.push(densityEntry);
+
+    let thicknessLabel = document.createElement('label');
+    thicknessLabel.innerHTML = "<b>材料厚度(micron)：</b>";
+    let thicknessEntry = document.createElement('input');
+    thicknessEntry.type = 'text';
+    thicknessEntry.id = 'thickness_entry2_' + i;
+    thicknessEntry.placeholder = '输入材料厚度';
+    thicknessEntry.required = true;
+    thicknessEntries2.push(thicknessEntry);
+
+    let thicknessNotice = document.createElement('span');
+    thicknessNotice.style = "color: red; font-weight: bold; display: block; text-align: center;";
+    thicknessNotice.textContent = "例：PET=12μm；0.01mm = 1C（丝）= 10µm";
+
+    let materialCostEntry = document.createElement('input');
+    materialCostEntry.type = 'hidden';
+    materialCostEntry.readOnly = true;
+    materialCostEntry.id = "materialCost_entry2_" + i;
+    materialCostEntries2.push(materialCostEntry);
+
+    materialSelect.addEventListener('change', function () {
+      let selectedMaterial = this.value;
+      let currentLayer = parseInt(this.id.split("_")[2]);
+      document.getElementById('density_entry2_' + currentLayer).value = materialDensity[selectedMaterial];
+      document.getElementById('materialCost_entry2_' + currentLayer).value = (materialCost[selectedMaterial] || 0).toFixed(4);
+    });
+
+    layerSelectionDiv.appendChild(layerLabel);
+    layerSelectionDiv.appendChild(materialSelect);
+    layerSelectionDiv.appendChild(densityEntry);
+    layerSelectionDiv.appendChild(thicknessLabel);
+    layerSelectionDiv.appendChild(thicknessEntry);
+    layerSelectionDiv.appendChild(thicknessNotice);
+    layerSelectionDiv.appendChild(materialCostEntry);
+  }
+}
+
+// --- 卷数估算：只需要密度+厚度来算克重 ---
+function createLayerSelectionRoll() {
+  densityEntriesRoll = [];
+  thicknessEntriesRoll = [];
+  let numLayersLocal = parseInt(document.getElementById('num_layers_roll').value);
+  let layerSelectionDiv = document.getElementById('layer_selection_roll');
+  layerSelectionDiv.innerHTML = '';
+
+  for (let i = 1; i <= numLayersLocal; i++) {
+    let label = document.createElement('label');
+    label.innerHTML = `<b>第${i}层材料：</b>`;
+
+    let materialSelect = document.createElement('select');
+    materialSelect.id = 'roll_material_' + i;
+    materialSelect.innerHTML = `<option disabled selected hidden>请选择材料</option>`;
+    for (let key in materialDensity) {
+      materialSelect.innerHTML += `<option value="${key}">${key}</option>`;
+    }
+
+    let densityInput = document.createElement('input');
+    densityInput.type = 'hidden';
+    densityInput.id = 'roll_density_' + i;
+    densityEntriesRoll.push(densityInput);
+
+    let thicknessLabel = document.createElement('label');
+    thicknessLabel.innerHTML = "<b>厚度（μm）：</b>";
+
+    let thicknessInput = document.createElement('input');
+    thicknessInput.type = 'text';
+    thicknessInput.id = 'roll_thickness_' + i;
+    thicknessInput.placeholder = '例如 12';
+    thicknessEntriesRoll.push(thicknessInput);
+
+    materialSelect.addEventListener('change', function () {
+      let selected = this.value;
+      document.getElementById('roll_density_' + i).value = materialDensity[selected];
+    });
+
+    layerSelectionDiv.appendChild(label);
+    layerSelectionDiv.appendChild(materialSelect);
+    layerSelectionDiv.appendChild(densityInput);
+    layerSelectionDiv.appendChild(thicknessLabel);
+    layerSelectionDiv.appendChild(thicknessInput);
+  }
+}
+
+// --- 制袋：切换“有/无印刷”时刷新已选层的隐藏单价（不清空厚度/利润） ---
+function refreshBagLayerCostsOnly() {
+  if (!numLayers || numLayers <= 0) return;
+  for (let i = 1; i <= numLayers; i++) {
+    const sel = document.getElementById('material_select_' + i);
+    if (!sel) continue;
+    if (sel.value && sel.value !== "") {
+      sel.dispatchEvent(new Event('change'));
+    }
+  }
+}
+
+
+/* =============================================================================
+   D. 主计算：calculateFinalPrice（制袋 / 卷膜 / 卷膜张数 / 卷数估算）
+   说明：此处不做“逻辑改写”，仅加注释，保持你现有计算方式
+============================================================================= */
+
+function calculateFinalPrice() {
+  let calculationType = document.getElementById("calculate_type_entry").value;
+
+  /* -----------------------------
+     D1. 制袋（元/个）
+  ----------------------------- */
+  if (calculationType === "制袋") {
+
+    // 基础尺寸/数量
+    let height = parseFloat(document.getElementById('height_entry').value);
+    let bottom = parseFloat(document.getElementById('bottom_entry').value);
+    let width  = parseFloat(document.getElementById('width_entry').value);
+    let quantity = parseFloat(document.getElementById('quantity_entry').value) * 10000;
+
+    // 印刷模式（有/无）
+    let printModeBag = document.getElementById('print_mode_bag')?.value || "print";
+
+    // 版费：颜色数 / 手输 / 币种换算（无印刷时强制为0）
+    let colorCount = parseInt(document.getElementById('color_count').value || "0");
+    let exchangeRateBag = parseFloat(document.getElementById('exchange_rate_entry').value || "7");
+    let plateFeeManual = parseFloat(document.getElementById('plate_fee_input').value || "0");
+    let plateFeeCurrency = document.getElementById('plate_fee_currency').value;
+
+    let plateFeeTotal = 0;
+    if (printModeBag === "none") {
+      plateFeeTotal = 0;
+    } else {
+      if (!isNaN(plateFeeManual) && plateFeeManual > 0) {
+        plateFeeTotal = plateFeeManual;
+        if (plateFeeCurrency === "美元") plateFeeTotal *= exchangeRateBag;
+      } else {
+        plateFeeTotal = colorCount * 700;
+      }
+    }
+
+    let plateFeePerBag = quantity > 0 ? (plateFeeTotal / quantity) : 0;
+
+    // 利润率
+    let profitMargin = parseFloat(document.getElementById('profit_margin_entry').value);
+
+    // 动态层：密度、厚度、（材料+工序）元/kg
+    let density = densityEntries.map(entry => parseFloat(entry.value));
+    let thickness = thicknessEntries.map(entry => parseFloat(entry.value));
+    let layerCostPerKgArr = materialCostEntries.map(entry => parseFloat(entry.value));
+
+    // 制袋工费（袋型下拉）
+    let bagCost = parseFloat(document.getElementById('bag_type_select').value) || 0;
+
+    // 1) 材料+工序成本（按每袋重量×元/kg）
+    let totalMaterialCost = density.reduce((total, d, index) => {
+      if (isNaN(d)) return total;
+      const t = thickness[index];
+      const costPerKg = layerCostPerKgArr[index] || 0;
+      if (isNaN(t) || isNaN(costPerKg)) return total;
+
+      const areaM2 = 2 * width * (height + bottom * 2) * 0.0001;
+      const layerWeightKg = t * d * areaM2 / 1000;
+      return total + layerWeightKg * costPerKg;
+    }, 0);
+
+    // 2) 附加项（咖啡阀/拉链/手扣/吸嘴/凹槽/FOB/CIF）按“每袋”计
+    let additionalCosts = 0;
+    additionalCosts += parseFloat(document.getElementById('coffee_valve_select').value || "0");
+
+    if (document.getElementById('zipper_checkbox').checked) {
+      additionalCosts += 0.085 * (width * 0.01) * 2;
+    }
+    if (document.getElementById('handcuffs_checkbox').checked) {
+      additionalCosts += 0.13;
+    }
+    additionalCosts += parseFloat(document.getElementById('mouthpiece_select').value || "0");
+    if (document.getElementById('groove_checkbox').checked) {
+      additionalCosts += 0.01;
+    }
+
+    // FOB（制袋）：按票->按数量分摊
+    (function () {
+      const sel = document.getElementById('fob_select');
+      if (!sel || !sel.value) return;
+      const costCNY = parseFloat(sel.selectedOptions[0].dataset.cost || '0') || 0;
+      if (quantity > 0 && costCNY > 0) additionalCosts += (costCNY / quantity);
+    })();
+
+    // CIF（制袋）：输入约定为人民币->按数量分摊
+    (function () {
+      const cifCheckbox = document.getElementById('cif_checkbox');
+      if (!cifCheckbox || !cifCheckbox.checked) return;
+      const cifVal = parseFloat(document.getElementById('cif_input').value || '0');
+      if (!cifVal) return;
+      if (quantity > 0) additionalCosts += (cifVal / quantity);
+    })();
+
+    // 3) 总重量（kg），用于分切费 & 显示“单袋重量”
+    let totalWeight = 0; // g
+    for (let i = 0; i < density.length; i++) {
+      let d = density[i];
+      let t = thickness[i];
+      if (isNaN(d) || isNaN(t)) continue;
+      const layerWeightPerBag_g = t * d * 2 * width * (height + bottom * 2) * 0.0001;
+      totalWeight += layerWeightPerBag_g * quantity;
+    }
+    let totalWeightKg = totalWeight / 1000;
+    let weightPerBag_g = quantity > 0 ? (totalWeight / quantity) : 0;
+
+    // 分切成本（元/袋）
+    let slittingCostPerBag = 0;
+    if (quantity > 0 && totalWeightKg > 0) {
+      slittingCostPerBag = (totalWeightKg * SLITTING_COST_PER_KG) / quantity;
+    }
+
+    // 版费摊销（显示用）
+    let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
+
+    // 4) 汇总（含税/币种）
+    let taxMultiplierBag = document.getElementById('tax_checkbox').checked ? 1.13 : 1.0;
+    let costPerBagRMB = ((totalMaterialCost + plateFeePerBag) * profitMargin
+      + additionalCosts
+      + slittingCostPerBag
+      + bagCost) * taxMultiplierBag;
+
+    let currency = document.getElementById('currency_entry').value;
+    let exchangeRateForShow = parseFloat(document.getElementById('exchange_rate_entry').value || "7");
+    let unitLabel = currency === "人民币" ? "¥/个" : "$/个";
+    let amountLabel = currency === "人民币" ? "¥" : "$";
+    let plateLabel = currency === "人民币" ? "元/kg" : "$/kg";
+
+    if (currency === "美元") {
+      costPerBagRMB = exchangeRateForShow ? (costPerBagRMB / exchangeRateForShow) : 0;
+    }
+
+    let totalAmount = costPerBagRMB * quantity;
+
+    document.getElementById('result_label').innerHTML =
+      "单个袋子重量：" + weightPerBag_g.toFixed(2) + " g/个<br>" +
+      "总重量约为：" + totalWeightKg.toFixed(2) + " kg<br>" +
+      "版费摊销：" + plateFeePerKg.toFixed(2) + " " + plateLabel + "<br>" +
+      "制袋价格（单价）：" + costPerBagRMB.toFixed(5) + unitLabel + "<br>" +
+      "<b>制袋总额</b>：" + amountLabel + totalAmount.toFixed(2);
+
+    return;
+  }
+
+  /* -----------------------------
+     D2. 卷膜（元/kg）
+  ----------------------------- */
+  else if (calculationType === "卷膜") {
+
+    // 计算方式：spec（卷规格）/ size（按尺寸换算）
+    const rollMode = document.getElementById('roll_calc_mode')?.value || 'spec';
+    let area = 0;
+
+    if (rollMode === 'spec') {
+      let width = parseFloat(document.getElementById("film_width").value) / 100;
+      let length = parseFloat(document.getElementById("film_length").value);
+      let rollCount = parseInt(document.getElementById("film_count").value);
+      area = width * length * rollCount;
+    } else {
+      const W = parseFloat(document.getElementById('roll_bag_width_cm').value || "0");
+      const H = parseFloat(document.getElementById('roll_bag_height_cm').value || "0");
+      const B = parseFloat(document.getElementById('roll_bag_bottom_cm').value || "0");
+      const Q = parseFloat(document.getElementById('roll_bag_qty').value || "0");
+      const sideAllow = parseFloat(document.getElementById('roll_side_allow_cm').value || "0");
+      const tbAllow = parseFloat(document.getElementById('roll_tb_allow_cm').value || "0");
+
+      const filmWidth_cm = 2 * W + sideAllow;
+      const unitLen_cm = H + (2 * B) + tbAllow;
+      area = (filmWidth_cm / 100) * (unitLen_cm / 100) * Q;
+    }
+
+    // 动态层：密度、厚度、材料单价（元/kg）
+    let density = densityEntries2.map(entry => parseFloat(entry.value));
+    let thickness = thicknessEntries2.map(entry => parseFloat(entry.value));
+    let matCostArr = materialCostEntries2.map(entry => parseFloat(entry.value));
+
+    // 汇率/币种/利润/含税
+    let exchangeRate = parseFloat(document.getElementById("exchange1_rate_entry").value || "7");
+    let currency = document.getElementById('currency1_entry').value;
+    let profitMargin = parseFloat(document.getElementById('profit_margin_entry1').value || "1");
+    let taxMultiplier = document.getElementById('tax_checkbox1').checked ? 1.13 : 1.0;
+
+    // 印刷模式：有/无
+    let printModeRoll = document.getElementById('print_mode_roll')?.value || "print";
+
+    // 版费：颜色数 / 手输 / 币种换算（无印刷时强制为0）
+    let colorCount = parseInt(document.getElementById("color_count1").value) || 0;
+    let plateFeeManual = parseFloat(document.getElementById("plate_fee_input1").value || "0");
+    let plateFeeCurrency = document.getElementById("plate_fee_currency1").value;
+
+    let plateFeeTotal = 0;
+    if (printModeRoll === "none") {
+      plateFeeTotal = 0;
+    } else {
+      if (!isNaN(plateFeeManual) && plateFeeManual > 0) {
+        plateFeeTotal = plateFeeManual;
+        if (plateFeeCurrency === "美元") plateFeeTotal *= exchangeRate;
+      } else {
+        plateFeeTotal = colorCount * 700;
+      }
+    }
+
+    // -------- 1) 计算卷膜总重量（kg）--------
+    // 面积 area（m²）× 厚度(μm) × 密度(g/cm³) = g/m²；再换算 kg
+    let totalWeightKg = density.reduce((sumKg, d, idx) => {
+      const t = thickness[idx];
+      if (isNaN(d) || isNaN(t)) return sumKg;
+      const gsm = t * d; // g/m²
+      return sumKg + (area * gsm) / 1000; // kg
+    }, 0);
+
+    // -------- 2) 材料成本（元）--------
+    let materialCostTotal = density.reduce((sum, d, idx) => {
+      const t = thickness[idx];
+      const costPerKg = matCostArr[idx] || 0;
+      if (isNaN(d) || isNaN(t) || isNaN(costPerKg)) return sum;
+
+      const layerWeightKg = (area * (t * d)) / 1000;
+      return sum + layerWeightKg * costPerKg;
+    }, 0);
+
+    // -------- 3) 卷膜工序成本（元）--------
+    // 按“对应层重量”计费：
+    // 1）印刷：只算第一层重量
+    // 2）复合：每次复合看“下一层”材料，按下一层重量计费
+    // 3）分切：这里先不算（如要算可后面再加）
+
+    // 第一层重量（kg）
+    let firstLayerWeightKg = 0;
+    if (density.length > 0 && thickness.length > 0) {
+      if (!isNaN(density[0]) && !isNaN(thickness[0])) {
+        firstLayerWeightKg = (area * (thickness[0] * density[0])) / 1000;
+      }
+    }
+
+    // 各层重量（kg）
+    let layerWeightKgArr = density.map((d, idx) => {
+      const t = thickness[idx];
+      if (isNaN(d) || isNaN(t)) return 0;
+      return (area * (t * d)) / 1000;
+    });
+
+    // 1. 印刷成本：只算第一层
+    let printingCostTotal = 0;
+    if (printModeRoll !== "none") {
+      printingCostTotal = firstLayerWeightKg * ROLL_PRINTING_COST_PER_KG;
+    }
+
+    // 2. 复合成本：看“下一层”是不是AL
+    let laminationCostTotal = 0;
+    for (let idx = 1; idx < numLayers2; idx++) {
+      const nextMaterial = document.getElementById("material_select2_" + (idx + 1))?.value || "";
+      const nextLayerWeightKg = layerWeightKgArr[idx] || 0;
+
+      if (nextMaterial === "AL") {
+        laminationCostTotal += nextLayerWeightKg * ROLL_LAM_AL_COST_PER_KG;
+      } else {
+        laminationCostTotal += nextLayerWeightKg * ROLL_LAM_AUTO_COST_PER_KG;
+      }
+    }
+
+    // 3. 分切成本：先不算
+    let slittingCostTotal = 0;
+
+    // -------- 4) 版费摊销（按kg展示）--------
+    let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
+
+    // -------- 5) FOB/CIF（卷膜：按“总额”加到最后）--------
+    let additionalAmount = 0;
+
+    // 卷膜 FOB：下拉里带 data-cost（人民币），直接加到总额
+    (function () {
+      const sel = document.getElementById('rf_fob_select');
+      if (!sel || !sel.value) return;
+      const costCNY = parseFloat(sel.selectedOptions[0].dataset.cost || '0') || 0;
+      additionalAmount += costCNY;
+    })();
+
+    // 卷膜 CIF：手输人民币
+    (function () {
+      const cifCheckbox = document.getElementById('rf_cif_checkbox');
+      if (!cifCheckbox || !cifCheckbox.checked) return;
+      const cifVal = parseFloat(document.getElementById('rf_cif_input').value || '0');
+      if (!cifVal) return;
+      additionalAmount += cifVal;
+    })();
+
+    // -------- 6) 汇总：得到元/kg & 总额--------
+    // 你的卷膜是“先算总成本，再除以kg得到单价”
+    let totalCostRMB =
+      (materialCostTotal + printingCostTotal + laminationCostTotal + slittingCostTotal + plateFeeTotal) * profitMargin * taxMultiplier
+      + additionalAmount;
+
+    let unitCostRMBPerKg = totalWeightKg > 0 ? (totalCostRMB / totalWeightKg) : 0;
+
+    // 币种显示（美元则整体换算）
+    let unitLabel = currency === "人民币" ? "¥/kg" : "$/kg";
+    let amountLabel = currency === "人民币" ? "¥" : "$";
+    let plateLabel = currency === "人民币" ? "元/kg" : "$/kg";
+
+    let totalAmountShow = totalCostRMB;
+    let unitCostShow = unitCostRMBPerKg;
+    let plateFeePerKgShow = plateFeePerKg;
+
+    if (currency === "美元") {
+      unitCostShow = exchangeRate ? (unitCostRMBPerKg / exchangeRate) : 0;
+      totalAmountShow = exchangeRate ? (totalCostRMB / exchangeRate) : 0;
+      plateFeePerKgShow = exchangeRate ? (plateFeePerKg / exchangeRate) : 0;
+    }
+
+    // -------- 6.5) 计算 1㎡ 单价 --------
+    let unitPriceRMBPerM2 = area > 0 ? (totalCostRMB / area) : 0;
+
+    let unitPricePerM2Show = unitPriceRMBPerM2;
+
+    // 美元显示换算
+    if (currency === "美元") {
+      unitPricePerM2Show = exchangeRate ? (unitPriceRMBPerM2 / exchangeRate) : 0;
+    }
+  
+    document.getElementById("result_label").innerHTML =
+      "计算方式：" + (rollMode === "spec" ? "按卷规格" : "按尺寸换算") + "<br>" +
+      "总重量约为：" + totalWeightKg.toFixed(2) + " kg<br>" +
+      "版费摊销：" + plateFeePerKgShow.toFixed(2) + " " + plateLabel + "<br>" +
+      "卷膜价格（单价）：" + unitCostShow.toFixed(3) + unitLabel + "<br>" +
+      "卷膜价格（㎡）：" + unitPricePerM2Show.toFixed(3) +
+    (currency === "人民币" ? " ¥/㎡" : " $/㎡") + "<br>" +
+      "<b>卷膜总额：</b>" + amountLabel + totalAmountShow.toFixed(2);
+
+    return;
+  }
+
+  /* -----------------------------
+     D3. 卷膜张数（估算：按卷膜宽/长/张长/数量）
+     说明：这一块保持你原来的“张数换算”逻辑
+  ----------------------------- */
+  else if (calculationType === "卷膜张数") {
+  // 读取你 UI 现有的 id（单位：cm / m）
+  const W = parseFloat(document.getElementById("width_entry1").value || "0");        // 袋宽 cm
+  const H = parseFloat(document.getElementById("height_entry1").value || "0");       // 袋高 cm
+  const B = parseFloat(document.getElementById("bottom_entry1").value || "0");       // 底 cm（单边）
+  const filmLenM = parseFloat(document.getElementById("film_length_entry").value || "0"); // 卷膜长度 m
+  const filmWidthCm = parseFloat(document.getElementById("film_width_entry").value || "0"); // 卷膜宽 cm
+
+  if (W <= 0 || H <= 0 || filmLenM <= 0 || filmWidthCm <= 0) {
+    document.getElementById("result_label").innerHTML =
+      "请填写：袋宽、袋高、膜长度、膜宽（底无则填0）。";
+    return;
+  }
+
+  // 这里用一个“通用估算逻辑”
+  // 单个袋子的走料长度（cm）：袋高 + 2*底（你UI提示底是单边）
+  const pitchCm = H + 2 * B;
+
+  // 横向排版：卷膜宽 / (2*袋宽) 估算（背封/对折类常用；只是估算）
+  const across = Math.max(1, Math.floor(filmWidthCm / (2 * W)));
+
+  // 纵向：总长(cm) / 走料(cm)
+  const totalLenCm = filmLenM * 100;
+  const along = Math.floor(totalLenCm / pitchCm);
+
+  const totalPieces = across * along;
+
+  document.getElementById("result_label").innerHTML =
+    "走料长度（估算）：" + pitchCm.toFixed(2) + " cm/个<br>" +
+    "横向排数（估算）：" + across + "<br>" +
+    "纵向个数（估算）：" + along + "<br>" +
+    "<b>预计总张数/个数：</b>" + totalPieces;
+  return;
+}
+
+  /* -----------------------------
+     D4. 卷数估算（按宽、外径、芯径、厚度/层数估算）
+     说明：你页面上是一个独立模块，下面保持“总厚度 -> 单位长度 -> 卷数”思路
+  ----------------------------- */
+  else if (calculationType === "卷数估算") {
+
+  const totalWeightKg = parseFloat(document.getElementById("total_weight_input").value || "0"); // 总重量 kg
+  const filmWidthCm = parseFloat(document.getElementById("film_width_input").value || "0");     // 展开宽 cm
+  const rollLenM = parseFloat(document.getElementById("roll_length_input").value || "0");      // 每卷长度 m
+
+  if (totalWeightKg <= 0 || filmWidthCm <= 0 || rollLenM <= 0) {
+    document.getElementById("result_label").innerHTML =
+      "请填写：总重量（kg）、膜展开宽度（cm）、每卷长度（m）。";
+    return;
+  }
+
+  // 结构总克重 gsm = Σ(厚度μm × 密度g/cm³)  → g/m²
+  let gsm = 0;
+  for (let i = 0; i < thicknessEntriesRoll.length; i++) {
+    const t = parseFloat(thicknessEntriesRoll[i].value || "0"); // μm
+    const dInput = densityEntriesRoll[i];
+    const d = parseFloat(dInput?.value || "0"); // g/cm³
+    if (t > 0 && d > 0) gsm += (t * d);
+  }
+
+  if (gsm <= 0) {
+    document.getElementById("result_label").innerHTML =
+      "请先选择每层材料，并填写每层厚度（μm）。";
+    return;
+  }
+
+  // 单卷面积 m² = 宽(m) × 长(m)
+  const areaPerRoll = (filmWidthCm / 100) * rollLenM;
+
+  // 单卷重量 kg = 面积 × gsm(g/m²) / 1000
+  const weightPerRollKg = (areaPerRoll * gsm) / 1000;
+
+  if (weightPerRollKg <= 0) {
+    document.getElementById("result_label").innerHTML = "参数异常：单卷重量计算为0，请检查输入。";
+    return;
+  }
+
+  // 卷数 = 总重量 / 单卷重量
+  const rollCount = totalWeightKg / weightPerRollKg;
+
+  document.getElementById("result_label").innerHTML =
+    "结构总克重（gsm）：" + gsm.toFixed(2) + " g/m²<br>" +
+    "单卷面积：" + areaPerRoll.toFixed(2) + " m²<br>" +
+    "单卷重量：" + weightPerRollKg.toFixed(2) + " kg/卷<br>" +
+    "<b>预计卷数：</b>" + rollCount.toFixed(2) + " 卷";
+  return;
+}
+} 
+/* =============================================================================
+   E. 页面初始化（默认隐藏/默认切换一次）
+============================================================================= */
+window.onload = function () {
+  // 初始化：默认按当前下拉刷新显示
+  toggleCalculationType();
+  toggleExchangeRate();
+  toggleExchangeRate1();
+  toggleCIFBag();
+  toggleCIFRoll();
+  togglePrintFields('bag');
+  togglePrintFields('roll');
+  toggleRollCalcMode();
+};
+
+/*
+    function checkPassword() {
+        const correctPassword = "00000000";
+        const input = document.getElementById("custom-password").value;
+        if (input === correctPassword) {
+            document.getElementById("password-overlay").style.display = "none";
+            // 初始化计算系统
+            createLayerSelection();
+            createLayerSelection2();
+        } else {
+            alert("密码错误！您无权访问此页面。");
+            window.location.href = "https://www.dqpack.com/";
+        }
+    }
+*/
+</script>
+
+<script>
+  // PWA: 注册 Service Worker（用于“可安装到桌面”和离线缓存）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>
