@@ -3141,12 +3141,28 @@ window.onload = function () {
 </script>
 
 <script>
-  // PWA: 注册 Service Worker（用于“可安装到桌面”和离线缓存）
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    });
-  }
+const APP_VERSION = '20260312-1';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION);
+      reg.update();
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          reg.update();
+        }
+      });
+    } catch (e) {
+      console.log('SW register failed:', e);
+    }
+  });
+}
 </script>
 
 </body>
