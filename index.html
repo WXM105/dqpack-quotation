@@ -2549,7 +2549,7 @@ function calculateFinalPrice() {
       let width = parseFloat(document.getElementById("film_width").value) / 100;
       let length = parseFloat(document.getElementById("film_length").value);
       let rollCount = parseInt(document.getElementById("film_count").value);
-      area = width * length * rollCount;
+      area = 1;
     } else {
       const W = parseFloat(document.getElementById('roll_bag_width_cm').value || "0");
       const H = parseFloat(document.getElementById('roll_bag_height_cm').value || "0");
