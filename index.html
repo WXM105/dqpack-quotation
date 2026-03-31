@@ -2549,7 +2549,7 @@ function calculateFinalPrice() {
       let width = parseFloat(document.getElementById("film_width").value) / 100;
       let length = parseFloat(document.getElementById("film_length").value);
       let rollCount = parseInt(document.getElementById("film_count").value);
-      area = 1;
+      area = width * length * rollCount;
     } else {
       const W = parseFloat(document.getElementById('roll_bag_width_cm').value || "0");
       const H = parseFloat(document.getElementById('roll_bag_height_cm').value || "0");
@@ -2595,12 +2595,12 @@ function calculateFinalPrice() {
     }
 
     // -------- 1) 计算卷膜总重量（kg）--------
-    // 面积 area（m²）× 厚度(μm) × 密度(g/cm³) = g/m²；再换算 kg
+    // 厚度(μm) × 密度(g/cm³) = g/m²；再换算 kg
     let totalWeightKg = density.reduce((sumKg, d, idx) => {
       const t = thickness[idx];
       if (isNaN(d) || isNaN(t)) return sumKg;
       const gsm = t * d; // g/m²
-      return sumKg + (area * gsm) / 1000; // kg
+      return sumKg + gsm / 1000; // kg
     }, 0);
 
     // -------- 2) 材料成本（元）--------
@@ -2609,7 +2609,7 @@ function calculateFinalPrice() {
       const costPerKg = matCostArr[idx] || 0;
       if (isNaN(d) || isNaN(t) || isNaN(costPerKg)) return sum;
 
-      const layerWeightKg = (area * (t * d)) / 1000;
+      const layerWeightKg = (t * d) / 1000;
       return sum + layerWeightKg * costPerKg;
     }, 0);
 
@@ -2623,7 +2623,7 @@ function calculateFinalPrice() {
     let firstLayerWeightKg = 0;
     if (density.length > 0 && thickness.length > 0) {
       if (!isNaN(density[0]) && !isNaN(thickness[0])) {
-        firstLayerWeightKg = (area * (thickness[0] * density[0])) / 1000;
+        firstLayerWeightKg = (thickness[0] * density[0]) / 1000;
       }
     }
 
@@ -2631,7 +2631,7 @@ function calculateFinalPrice() {
     let layerWeightKgArr = density.map((d, idx) => {
       const t = thickness[idx];
       if (isNaN(d) || isNaN(t)) return 0;
-      return (area * (t * d)) / 1000;
+      return (t * d) / 1000;
     });
 
     // 1. 印刷成本：只算第一层
