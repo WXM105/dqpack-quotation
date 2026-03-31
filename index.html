@@ -2685,7 +2685,7 @@ function calculateFinalPrice() {
       (materialCostTotal + printingCostTotal + laminationCostTotal + slittingCostTotal + plateFeeTotal) * profitMargin * taxMultiplier
       + additionalAmount;
 
-    let unitCostRMBPerKg = totalWeightKg > 0 ? (totalCostRMB / 1000) : 0;
+    let unitCostRMBPerKg = totalWeightKg > 0 ? (totalCostRMB / totalWeightKg) : 0;
 
     // 币种显示（美元则整体换算）
     let unitLabel = currency === "人民币" ? "¥/kg" : "$/kg";
