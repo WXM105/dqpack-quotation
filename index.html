@@ -2839,7 +2839,7 @@ function calculateFinalPrice() {
       metrics: [
         { label: '计算方式', value: (rollMode === 'spec' ? '按卷规格' : '按尺寸换算') },
         { label: '总重量估算', value: salesWeightKg.toFixed(2) + ' kg' },
-        { label: '涂胶增重修正', value: hasRollCoating ? ('成本重量 ' + rawTotalWeightKg.toFixed(2) + ' kg ÷ 1.15 = ' + totalWeightKg.toFixed(2) + ' kg；单价仍按成品重量 ' + salesWeightKg.toFixed(2) + ' kg 摊销') : '未启用' },
+        { label: '涂胶增重修正', value: hasRollCoating ? ('成本重量 ' + totalWeightKg.toFixed(2) + ' kg') : '未启用' },
         { label: '涂胶成本', value: coatingCostPerM2 > 0 ? (coatingCostPerM2.toFixed(2) + ' 元/㎡，合计 ¥' + coatingCostTotal.toFixed(2)) : '未计涂胶' },
         { label: '版费摊销', value: plateFeePerKgShow.toFixed(2) + ' ' + plateLabel },
         { label: '卷膜单价', value: unitCostShow.toFixed(3) + unitLabel },
