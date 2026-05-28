@@ -2569,7 +2569,7 @@ function calculateFinalPrice() {
     }
 
     // 版费摊销（显示用）
-    let plateFeePerKg = salesWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
+    let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
 
     // 4) 汇总（含税/币种）
     let taxMultiplierBag = document.getElementById('tax_checkbox').checked ? 1.13 : 1.0;
