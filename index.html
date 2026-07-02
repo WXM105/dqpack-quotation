@@ -788,6 +788,99 @@
             line-height: 1.8;
         }
 
+        .barrier-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .barrier-stat {
+            border: 1px solid #dbe6f5;
+            border-radius: 16px;
+            background: #fff;
+            padding: 14px;
+        }
+
+        .barrier-stat strong {
+            display: block;
+            margin-top: 6px;
+            color: #0f172a;
+            font-size: 20px;
+        }
+
+        .recommendation-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .recommendation-card {
+            border: 1px solid #dbe6f5;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 16px;
+        }
+
+        .recommendation-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-head h4 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 18px;
+            line-height: 1.35;
+        }
+
+        .recommendation-badge {
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: rgba(11, 61, 145, 0.08);
+            color: #0b3d91;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .recommendation-card p,
+        .recommendation-card li {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        .recommendation-card ul {
+            margin: 8px 0 12px;
+            padding-left: 18px;
+        }
+
+        .mini-action-btn {
+            min-height: 38px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #0b3d91;
+            color: #fff;
+        }
+
+        .mini-action-btn:hover {
+            background: #082f70;
+        }
+
+        @media (max-width: 768px) {
+            .barrier-tabs {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation-head {
+                flex-direction: column;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -858,6 +951,18 @@
             <h3>产能统计</h3>
             <p>集中展示印刷、复合、分切、制袋、封管及月产能数据，并支持按客户需求快速反推预计所需天数。</p>
           </button>
+
+          <button class="calc-card" type="button" onclick="selectCalculationType('阻隔性能')">
+            <span class="card-tag">Barrier</span>
+            <h3>阻隔性能</h3>
+            <p>选择材料结构和厚度后，估算组合包装的阻氧、阻湿、遮光与适用功能，便于客户现场问答。</p>
+          </button>
+
+          <button class="calc-card" type="button" onclick="selectCalculationType('内容物推荐')">
+            <span class="card-tag">Recommend</span>
+            <h3>内容物推荐</h3>
+            <p>按客户要装的产品、保存条件和关注重点，快速推荐常用材料结构与厚度，并可带入阻隔测算。</p>
+          </button>
         </div>
       </div>
 
@@ -870,6 +975,8 @@
           <option value="卷数估算">卷数估算</option>
           <option value="装柜估算">装柜估算</option>
           <option value="产能统计">产能统计</option>
+          <option value="阻隔性能">阻隔性能</option>
+          <option value="内容物推荐">内容物推荐</option>
         </select>
       </div>
 
@@ -1621,6 +1728,111 @@
         </div>
       </div><!-- /#capacityStats_options -->
 
+
+      <!-- =========================================================
+           模块 7：阻隔性能（按材料结构估算 OTR / WVTR / 功能）
+      ========================================================== -->
+      <div id="barrierCalc_options" style="display: none;">
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">阻隔性能 - 数据说明</h3>
+          <p class="formula-note">
+            当前为商务快速估算：按每层材料的参考 OTR / WVTR 数据和厚度折算组合阻隔性。
+            不同供应商、测试温湿度、油墨、胶水、热封、针孔、折痕和杀菌条件都会影响实测结果；正式给客户承诺前建议以第三方检测报告或工厂实测为准。
+          </p>
+        </div>
+
+        <div class="section soft-section">
+          <h3 style="margin: 0 0 8px;">结构输入</h3>
+          <p class="module-cta-note">选择层数、每层材料和厚度后点击计算，即可得到阻氧、阻湿、遮光和推荐使用场景。</p>
+
+          <label for="barrier_num_layers"><b>选择层数：</b></label>
+          <select id="barrier_num_layers" onchange="createBarrierLayerSelection()">
+            <option value="" disabled selected hidden>请选择层数</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+
+          <div id="barrier_layer_selection"></div>
+        </div>
+
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">客户需求等级</h3>
+          <div class="simple-grid">
+            <div class="field-card">
+              <label for="barrier_need_select"><b>客户重点：</b></label>
+              <select id="barrier_need_select">
+                <option value="balanced">综合阻隔</option>
+                <option value="oxygen">重点阻氧</option>
+                <option value="moisture">重点阻湿</option>
+                <option value="light">重点遮光/保香</option>
+                <option value="retort">高温蒸煮适配</option>
+              </select>
+            </div>
+
+            <div class="field-card">
+              <label for="barrier_storage_select"><b>保存条件：</b></label>
+              <select id="barrier_storage_select">
+                <option value="normal">常温货架</option>
+                <option value="humid">高湿环境</option>
+                <option value="cold">冷藏/冷冻</option>
+                <option value="retort">水煮/蒸煮</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#barrierCalc_options -->
+
+
+      <!-- =========================================================
+           模块 8：内容物推荐（按产品场景推荐结构）
+      ========================================================== -->
+      <div id="contentRecommend_options" style="display: none;">
+        <div class="section">
+          <h3 style="margin: 10px 0 6px;">内容物推荐 - 选择客户产品</h3>
+          <p class="formula-note">
+            先问客户包装里面装什么、是否避光、是否高油脂、是否要蒸煮或冷冻，再用本模块快速筛选常用结构。
+            推荐结构是销售前期沟通模板，最终仍需结合装量、袋型、杀菌方式、保质期和客户测试标准确认。
+          </p>
+        </div>
+
+        <div class="section soft-section">
+          <div class="simple-grid">
+            <div class="field-card">
+              <label for="content_type_select"><b>内容物类型：</b></label>
+              <select id="content_type_select" onchange="renderContentRecommendations()">
+                <option value="coffee">咖啡 / 茶叶 / 香气型产品</option>
+                <option value="snack">膨化食品 / 坚果 / 饼干</option>
+                <option value="powder">奶粉 / 蛋白粉 / 调味粉</option>
+                <option value="sauce">酱料 / 果泥 / 液体</option>
+                <option value="petfood">宠物食品 / 高油脂颗粒</option>
+                <option value="frozen">冷冻食品</option>
+                <option value="retort_food">高温蒸煮食品</option>
+                <option value="daily">日化 / 洗护补充装</option>
+              </select>
+            </div>
+
+            <div class="field-card">
+              <label for="content_priority_select"><b>客户关注重点：</b></label>
+              <select id="content_priority_select" onchange="renderContentRecommendations()">
+                <option value="balanced">综合性价比</option>
+                <option value="high_barrier">高阻隔/长保质期</option>
+                <option value="retort">耐蒸煮/杀菌</option>
+                <option value="recyclable">可回收方向</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 style="margin: 10px 0 12px;">推荐结构</h3>
+          <div id="content_recommendation_result" class="recommendation-list"></div>
+        </div>
+      </div><!-- /#contentRecommend_options -->
+
       <!-- =========================================================
            底部：计算按钮 + 输出结果
       ========================================================== -->
@@ -1689,6 +1901,101 @@ let densityEntriesLoadBag = [];   // 装柜估算-袋子
 let thicknessEntriesLoadBag = [];
 let densityEntriesLoadRoll = [];  // 装柜估算-卷膜
 let thicknessEntriesLoadRoll = [];
+
+let densityEntriesBarrier = [];   // 阻隔性能模块
+let thicknessEntriesBarrier = [];
+
+// --- 阻隔性能参考数据库 ---
+// OTR: cc/(m²·day·atm)，WVTR: g/(m²·day)。按 referenceThickness 微米折算，数值用于商务估算。
+const barrierMaterialProfile = {
+  default: { otr: 1500, wvtr: 8, referenceThickness: 25, features: ['常规保护'], note: '缺少专属数据，按普通塑料膜保守估算。' },
+  BOPP: { otr: 1800, wvtr: 5.5, referenceThickness: 25, features: ['挺度好', '印刷表现好', '防潮一般'], note: '常用于外层印刷，阻氧能力有限。' },
+  CPP: { otr: 2600, wvtr: 7, referenceThickness: 25, features: ['热封好', '耐油性较好'], note: '常作热封层，阻隔主要依赖中间层。' },
+  PE: { otr: 3500, wvtr: 3.5, referenceThickness: 25, features: ['热封好', '耐低温', '防潮较好'], note: '阻湿好于阻氧，适合作内层。' },
+  PET: { otr: 90, wvtr: 3.2, referenceThickness: 12, features: ['挺度好', '耐温好', '印刷表现好'], note: '常用外层，基础阻氧优于 PE/CPP。' },
+  KPET: { otr: 8, wvtr: 1.2, referenceThickness: 12, features: ['高阻氧', '保香', '透明阻隔'], note: '适合需要透明且较高阻隔的结构。' },
+  VMPET: { otr: 1.5, wvtr: 0.8, referenceThickness: 12, features: ['高阻氧', '高阻湿', '遮光', '保香'], note: '镀铝层对折痕较敏感，实测需关注针孔和揉搓后数据。' },
+  AL: { otr: 0.03, wvtr: 0.03, referenceThickness: 7, features: ['极高阻隔', '完全遮光', '保香'], note: '铝箔阻隔强，但柔韧和折痕风险需结合产品测试。' },
+  PA: { otr: 45, wvtr: 18, referenceThickness: 15, features: ['耐穿刺', '耐低温', '柔韧'], note: '尼龙耐穿刺好，但吸湿后阻隔会变化。' },
+  EVOH: { otr: 0.8, wvtr: 35, referenceThickness: 15, features: ['极高阻氧', '透明阻隔'], note: '高湿条件下阻氧会下降，需 PE/PP 层保护。' },
+  PVC: { otr: 120, wvtr: 4, referenceThickness: 25, features: ['透明', '一定阻隔'], note: '按常规 PVC 膜参考估算。' },
+  POF: { otr: 6500, wvtr: 14, referenceThickness: 15, features: ['热缩', '展示性'], note: '偏展示包装，阻隔能力有限。' }
+};
+
+const contentRecommendationData = {
+  coffee: {
+    title: '咖啡 / 茶叶 / 香气型产品',
+    risks: ['氧气会造成香气流失和氧化', '光线会影响风味稳定', '若有排气需求可搭配咖啡阀'],
+    plans: [
+      { level: '推荐', name: 'PET12 / VMPET12 / PE80', reason: '高阻氧、高阻湿并具备遮光和保香，适合咖啡豆、咖啡粉、茶叶。', layers: [['PET白', 12], ['VMPET', 12], ['PE普通', 80]] },
+      { level: '高端', name: 'PET12 / AL7 / PE80', reason: '阻隔更强，适合长保质期、香气敏感或高端客户。', layers: [['PET白', 12], ['AL', 7], ['PE普通', 80]] },
+      { level: '透明', name: 'PET12 / KPET12 / PE80', reason: '适合希望可视化内容物，同时仍需要较好阻氧的客户。', layers: [['PET白', 12], ['KPET', 12], ['PE普通', 80]] }
+    ]
+  },
+  snack: {
+    title: '膨化食品 / 坚果 / 饼干',
+    risks: ['受潮会影响口感', '坚果类油脂容易氧化', '大袋需要关注挺度和封口强度'],
+    plans: [
+      { level: '常用', name: 'BOPP20 / CPP60', reason: '适合短货架期、对成本敏感的膨化食品和饼干。', layers: [['BOPP2.3c', 20], ['CPP', 60]] },
+      { level: '升级', name: 'PET12 / VMPET12 / PE70', reason: '显著提升阻湿、阻氧和遮光，适合坚果、高油脂零食。', layers: [['PET白', 12], ['VMPET', 12], ['PE普通', 70]] },
+      { level: '耐穿刺', name: 'PET12 / PA15 / PE80', reason: '更适合边角较硬、运输摩擦较高的产品。', layers: [['PET白', 12], ['佛塑PA', 15], ['PE普通', 80]] }
+    ]
+  },
+  powder: {
+    title: '奶粉 / 蛋白粉 / 调味粉',
+    risks: ['粉体怕潮、怕氧化', '细粉容易污染封口', '长保质期通常要求高阻隔'],
+    plans: [
+      { level: '推荐', name: 'PET12 / VMPET12 / PE100', reason: '兼顾阻湿、阻氧和热封，适合多数粉体补充装。', layers: [['PET白', 12], ['VMPET', 12], ['PE普通', 100]] },
+      { level: '高阻隔', name: 'PET12 / AL7 / PE100', reason: '适合奶粉、营养粉等对氧气和水汽敏感的高要求产品。', layers: [['PET白', 12], ['AL', 7], ['PE普通', 100]] },
+      { level: '透明阻隔', name: 'PET12 / KPET12 / PE100', reason: '适合需要看见粉体状态但仍要阻氧的展示方案。', layers: [['PET白', 12], ['KPET', 12], ['PE普通', 100]] }
+    ]
+  },
+  sauce: {
+    title: '酱料 / 果泥 / 液体',
+    risks: ['内容物有重量和流动性，需关注跌落、热封和耐穿刺', '酸碱、油脂和杀菌方式会影响内层选择'],
+    plans: [
+      { level: '常温', name: 'PET12 / PA15 / PE100', reason: '耐穿刺和热封强度较好，适合多数液体和酱料袋。', layers: [['PET白', 12], ['佛塑PA', 15], ['PE普通', 100]] },
+      { level: '高阻隔', name: 'PET12 / AL7 / PA15 / PE100', reason: '提升遮光、保香和阻氧，适合风味敏感或长保质期酱料。', layers: [['PET白', 12], ['AL', 7], ['佛塑PA', 15], ['PE普通', 100]] },
+      { level: '低气味', name: 'PET12 / PA15 / PE-D-K(低气味水袋)100', reason: '适合饮品、水袋、果泥等对气味更敏感的内容物。', layers: [['PET白', 12], ['佛塑PA', 15], ['PE-D-K(低气味水袋)', 100]] }
+    ]
+  },
+  petfood: {
+    title: '宠物食品 / 高油脂颗粒',
+    risks: ['油脂氧化会产生异味', '颗粒边角需要耐穿刺', '大规格袋需要更高挺度和封口强度'],
+    plans: [
+      { level: '推荐', name: 'PET12 / VMPET12 / PE100', reason: '高阻隔、遮光和保香，适合中小规格宠物零食。', layers: [['PET白', 12], ['VMPET', 12], ['PE普通', 100]] },
+      { level: '重包', name: 'PET12 / PA15 / WPE-D-K120', reason: '耐穿刺和承重更好，适合较大规格狗粮或猫粮。', layers: [['PET白', 12], ['佛塑PA', 15], ['WPE-D-K (乳白低气味10kg狗粮)', 120]] },
+      { level: '高端', name: 'PET12 / AL7 / PE120', reason: '适合高油脂、长保质期或高端线产品。', layers: [['PET白', 12], ['AL', 7], ['PE普通', 120]] }
+    ]
+  },
+  frozen: {
+    title: '冷冻食品',
+    risks: ['低温下材料需要柔韧', '运输中易跌落、摩擦和穿刺', '水汽管理和封口强度很关键'],
+    plans: [
+      { level: '推荐', name: 'PET12 / PA15 / 低温PE80', reason: '耐低温和耐穿刺表现更稳，适合冷冻食品。', layers: [['PET白', 12], ['佛塑PA', 15], ['低温PE(DW-105)', 80]] },
+      { level: '经济', name: 'PET12 / PE80', reason: '适合轻量、短周期、低穿刺风险的冷冻产品。', layers: [['PET白', 12], ['低温PE(DW-105)', 80]] },
+      { level: '高阻隔', name: 'PET12 / VMPET12 / 低温PE80', reason: '适合同时需要遮光、保香和较高阻隔的冷冻产品。', layers: [['PET白', 12], ['VMPET', 12], ['低温PE(DW-105)', 80]] }
+    ]
+  },
+  retort_food: {
+    title: '高温蒸煮食品',
+    risks: ['需要确认 121℃ 或 135℃ 条件', '材料、胶水和油墨都要满足蒸煮', '热封层要匹配杀菌后强度'],
+    plans: [
+      { level: '透明蒸煮', name: 'PET12 / PA15 / 蒸煮CP70', reason: '适合需要透明展示的蒸煮食品，需配套蒸煮胶水。', layers: [['PET白', 12], ['佛塑PA', 15], ['蒸煮CP', 70]] },
+      { level: '高阻隔蒸煮', name: 'PET12 / AL7 / PA15 / 蒸煮CP70', reason: '适合肉制品、调理食品等长保质期蒸煮场景。', layers: [['PET白', 12], ['AL', 7], ['佛塑PA', 15], ['蒸煮CP', 70]] },
+      { level: '液体蒸煮', name: 'PET12 / PA15 / 四级液体蒸煮cp80', reason: '适合液体或较重内容物，重点关注热封和耐跌落。', layers: [['PET白', 12], ['佛塑PA', 15], ['四级液体蒸煮cp', 80]] }
+    ]
+  },
+  daily: {
+    title: '日化 / 洗护补充装',
+    risks: ['内容物可能有表活、香精或腐蚀性', '重点关注耐化学、热封和跌落', '不一定需要极高阻氧'],
+    plans: [
+      { level: '常用', name: 'PET12 / PA15 / PE100', reason: '耐穿刺、热封和整体强度较稳，适合多数补充装。', layers: [['PET白', 12], ['佛塑PA', 15], ['PE普通', 100]] },
+      { level: '大容量', name: 'PET12 / PA15 / PE-M-01 120', reason: '适合较大容量或自立吸嘴袋，提高承重和热封余量。', layers: [['PET白', 12], ['佛塑PA', 15], ['PE-M-01 (350ml-4000ml)', 120]] },
+      { level: '可回收方向', name: 'PE印刷层 / PE阻隔层 / PE热封层', reason: '偏单一材质方向，适合客户提出可回收诉求时作为初步方案。', layers: [['HDPE', 25], ['PE普通', 50], ['PE普通', 80]] }
+    ]
+  }
+};
 
 // --- 材料密度（g/cm³） ---
 let materialDensity = {
@@ -1823,6 +2130,217 @@ function getMaterialOptionsHtml() {
     html += `<option value="${key}">${key}</option>`;
   }
   return html;
+}
+
+function getBarrierProfile(materialName) {
+  const name = materialName || '';
+  if (name.includes('AL') || name.includes('铝')) return barrierMaterialProfile.AL;
+  if (name.includes('VMPET')) return barrierMaterialProfile.VMPET;
+  if (name.includes('KPET') || name.includes('高阻隔')) return barrierMaterialProfile.KPET;
+  if (name.includes('尼龙') || name.includes('PA')) return barrierMaterialProfile.PA;
+  if (name.includes('PET')) return barrierMaterialProfile.PET;
+  if (name.includes('BOPP') || name.includes('OPP')) return barrierMaterialProfile.BOPP;
+  if (name.includes('CPP') || name.includes('CP') || name.includes('蒸煮CP') || name.includes('cp')) return barrierMaterialProfile.CPP;
+  if (name.includes('PE') || name.includes('LLDPE') || name.includes('HDPE') || name.includes('RPE')) return barrierMaterialProfile.PE;
+  if (name.includes('PVC')) return barrierMaterialProfile.PVC;
+  if (name.includes('POF')) return barrierMaterialProfile.POF;
+  return barrierMaterialProfile.default;
+}
+
+function classifyBarrierValue(type, value) {
+  if (!isFinite(value) || value <= 0) return '数据不足';
+  if (type === 'otr') {
+    if (value <= 1) return '极高阻氧';
+    if (value <= 10) return '高阻氧';
+    if (value <= 100) return '中高阻氧';
+    if (value <= 1000) return '普通阻氧';
+    return '低阻氧';
+  }
+  if (value <= 0.5) return '极高阻湿';
+  if (value <= 2) return '高阻湿';
+  if (value <= 6) return '中等阻湿';
+  return '普通阻湿';
+}
+
+function calculateBarrierFromLayers(layers) {
+  let oxygenResistance = 0;
+  let moistureResistance = 0;
+  let totalGsm = 0;
+  const featureSet = new Set();
+  const notes = [];
+  const layerDetails = [];
+
+  layers.forEach(function(layer) {
+    const material = layer.material;
+    const thickness = Number(layer.thickness || 0);
+    const density = materialDensity[material] || 0;
+    if (!material || thickness <= 0) return;
+
+    const profile = getBarrierProfile(material);
+    const ratio = thickness / profile.referenceThickness;
+    const layerOtr = Math.max(0.001, profile.otr / Math.max(ratio, 0.01));
+    const layerWvtr = Math.max(0.001, profile.wvtr / Math.max(ratio, 0.01));
+    oxygenResistance += 1 / layerOtr;
+    moistureResistance += 1 / layerWvtr;
+    totalGsm += density > 0 ? thickness * density : 0;
+    profile.features.forEach(function(item) { featureSet.add(item); });
+    if (profile.note) notes.push(material + '：' + profile.note);
+    layerDetails.push(material + thickness + 'μm');
+  });
+
+  const otr = oxygenResistance > 0 ? 1 / oxygenResistance : 0;
+  const wvtr = moistureResistance > 0 ? 1 / moistureResistance : 0;
+  const features = Array.from(featureSet);
+  const hasFoil = layers.some(function(layer) { return (layer.material || '').includes('AL') || (layer.material || '').includes('铝'); });
+  const hasMetalized = layers.some(function(layer) { return (layer.material || '').includes('VMPET') || (layer.material || '').includes('铝'); });
+  if (hasFoil || hasMetalized) featureSet.add('遮光');
+
+  return {
+    structure: layerDetails.join(' / '),
+    otr: otr,
+    wvtr: wvtr,
+    gsm: totalGsm,
+    oxygenLevel: classifyBarrierValue('otr', otr),
+    moistureLevel: classifyBarrierValue('wvtr', wvtr),
+    features: Array.from(featureSet),
+    notes: Array.from(new Set(notes)).slice(0, 5)
+  };
+}
+
+function createBarrierLayerSelection() {
+  densityEntriesBarrier = [];
+  thicknessEntriesBarrier = [];
+  const container = document.getElementById('barrier_layer_selection');
+  const layerCount = parseInt(document.getElementById('barrier_num_layers')?.value || '0');
+  if (!container) return;
+  container.innerHTML = '';
+  container.className = 'layer-stack';
+
+  for (let i = 1; i <= layerCount; i++) {
+    const materialSelect = document.createElement('select');
+    materialSelect.id = 'barrier_material_' + i;
+    materialSelect.innerHTML = getMaterialOptionsHtml();
+
+    const densityEntry = document.createElement('input');
+    densityEntry.type = 'hidden';
+    densityEntry.id = 'barrier_density_' + i;
+    densityEntriesBarrier.push(densityEntry);
+
+    const thicknessLabel = document.createElement('label');
+    thicknessLabel.innerHTML = '<b>材料厚度(micron)：</b>';
+
+    const thicknessEntry = document.createElement('input');
+    thicknessEntry.type = 'text';
+    thicknessEntry.id = 'barrier_thickness_' + i;
+    thicknessEntry.placeholder = '例如 PET 12 / AL 7 / PE 80';
+    thicknessEntriesBarrier.push(thicknessEntry);
+
+    materialSelect.addEventListener('change', function () {
+      densityEntry.value = materialDensity[this.value] || 0;
+    });
+
+    const card = createLayerCardNode(i, materialSelect, densityEntry, thicknessLabel, thicknessEntry, '阻隔数据会按材料类型和厚度自动折算；正式数据请以检测报告为准。');
+    container.appendChild(card);
+  }
+}
+
+function getBarrierInputLayers() {
+  const layerCount = parseInt(document.getElementById('barrier_num_layers')?.value || '0');
+  const layers = [];
+  for (let i = 1; i <= layerCount; i++) {
+    const material = document.getElementById('barrier_material_' + i)?.value || '';
+    const thickness = parseFloat(document.getElementById('barrier_thickness_' + i)?.value || '0');
+    if (material && thickness > 0) layers.push({ material, thickness });
+  }
+  return layers;
+}
+
+function renderBarrierResult(layers, extraFootnote) {
+  if (!layers.length) {
+    renderPlainResultMessage('请先选择材料结构，并填写每层厚度（μm）。');
+    return;
+  }
+
+  const result = calculateBarrierFromLayers(layers);
+  const need = document.getElementById('barrier_need_select')?.value || 'balanced';
+  const storage = document.getElementById('barrier_storage_select')?.value || 'normal';
+  const focusTextMap = {
+    balanced: '综合阻隔', oxygen: '重点阻氧', moisture: '重点阻湿', light: '重点遮光/保香', retort: '高温蒸煮适配'
+  };
+  const storageTextMap = { normal: '常温货架', humid: '高湿环境', cold: '冷藏/冷冻', retort: '水煮/蒸煮' };
+
+  renderMetricResultPanel({
+    tag: 'Barrier Result',
+    title: '阻隔性能估算结果',
+    metrics: [
+      { label: '材料结构', value: result.structure || '未生成' },
+      { label: '结构总克重', value: result.gsm.toFixed(2) + ' g/m²' },
+      { label: '阻氧 OTR', value: result.otr.toFixed(3) + ' cc/(m²·day·atm) · ' + result.oxygenLevel, highlight: true },
+      { label: '阻湿 WVTR', value: result.wvtr.toFixed(3) + ' g/(m²·day) · ' + result.moistureLevel, highlight: true },
+      { label: '主要功能', value: result.features.join('、') || '常规保护' },
+      { label: '客户场景', value: (focusTextMap[need] || '综合阻隔') + ' / ' + (storageTextMap[storage] || '常温货架') }
+    ],
+    footnote: (extraFootnote || '') + ' 参考提示：' + result.notes.join('；') + '。数值为估算，测试条件默认按常见薄膜数据口径处理，正式报价资料建议附检测报告。'
+  });
+}
+
+function applyRecommendationToBarrier(planIndex) {
+  const type = document.getElementById('content_type_select')?.value || 'coffee';
+  const plan = contentRecommendationData[type]?.plans?.[planIndex];
+  if (!plan) return;
+  selectCalculationType('阻隔性能');
+  const layerSelect = document.getElementById('barrier_num_layers');
+  if (layerSelect) {
+    layerSelect.value = String(plan.layers.length);
+    createBarrierLayerSelection();
+  }
+  plan.layers.forEach(function(layer, idx) {
+    const i = idx + 1;
+    const materialInput = document.getElementById('barrier_material_' + i);
+    const thicknessInput = document.getElementById('barrier_thickness_' + i);
+    if (materialInput) {
+      materialInput.value = layer[0];
+      materialInput.dispatchEvent(new Event('change'));
+    }
+    if (thicknessInput) thicknessInput.value = layer[1];
+  });
+  renderBarrierResult(plan.layers.map(function(layer) { return { material: layer[0], thickness: layer[1] }; }), '已从内容物推荐带入结构：' + plan.name + '。');
+}
+
+function renderContentRecommendations() {
+  const type = document.getElementById('content_type_select')?.value || 'coffee';
+  const priority = document.getElementById('content_priority_select')?.value || 'balanced';
+  const data = contentRecommendationData[type];
+  const box = document.getElementById('content_recommendation_result');
+  if (!data || !box) return;
+
+  let plans = data.plans.map(function(plan, index) {
+    return Object.assign({ originalIndex: index }, plan);
+  });
+  if (priority === 'high_barrier') {
+    plans.sort(function(a, b) { return (b.name.includes('AL') || b.name.includes('VMPET') ? 1 : 0) - (a.name.includes('AL') || a.name.includes('VMPET') ? 1 : 0); });
+  } else if (priority === 'retort') {
+    plans.sort(function(a, b) { return (b.name.includes('蒸煮') || b.reason.includes('蒸煮') ? 1 : 0) - (a.name.includes('蒸煮') || a.reason.includes('蒸煮') ? 1 : 0); });
+  } else if (priority === 'recyclable') {
+    plans.sort(function(a, b) { return (b.name.includes('PE印刷层') || b.level.includes('可回收') ? 1 : 0) - (a.name.includes('PE印刷层') || a.level.includes('可回收') ? 1 : 0); });
+  }
+
+  box.innerHTML = plans.map(function(plan) {
+    const barrier = calculateBarrierFromLayers(plan.layers.map(function(layer) { return { material: layer[0], thickness: layer[1] }; }));
+    const risks = data.risks.map(function(item) { return '<li>' + item + '</li>'; }).join('');
+    return '<div class="recommendation-card">' +
+      '<div class="recommendation-head"><h4>' + plan.name + '</h4><span class="recommendation-badge">' + plan.level + '</span></div>' +
+      '<p><b>' + data.title + '</b>：' + plan.reason + '</p>' +
+      '<ul>' + risks + '</ul>' +
+      '<div class="barrier-tabs">' +
+        '<div class="barrier-stat">阻氧 OTR<strong>' + barrier.otr.toFixed(3) + '</strong></div>' +
+        '<div class="barrier-stat">阻湿 WVTR<strong>' + barrier.wvtr.toFixed(3) + '</strong></div>' +
+        '<div class="barrier-stat">结构克重<strong>' + barrier.gsm.toFixed(1) + ' g/m²</strong></div>' +
+      '</div>' +
+      '<p>主要功能：' + (barrier.features.join('、') || '常规保护') + '</p>' +
+      '<button type="button" class="mini-action-btn" onclick="applyRecommendationToBarrier(' + plan.originalIndex + ')">带入阻隔测算</button>' +
+    '</div>';
+  }).join('');
 }
 
 
@@ -2178,6 +2696,8 @@ function showHomePage() {
   const rollCountEstimateOptions = document.getElementById("rollCountEstimate_options");
   const containerLoadOptions = document.getElementById("containerLoad_options");
   const capacityStatsOptions = document.getElementById("capacityStats_options");
+  const barrierCalcOptions = document.getElementById("barrierCalc_options");
+  const contentRecommendOptions = document.getElementById("contentRecommend_options");
   const resultLabel = document.getElementById("result_label");
 
   if (homePage) homePage.style.display = "block";
@@ -2189,6 +2709,8 @@ function showHomePage() {
   if (rollCountEstimateOptions) rollCountEstimateOptions.style.display = "none";
   if (containerLoadOptions) containerLoadOptions.style.display = "none";
   if (capacityStatsOptions) capacityStatsOptions.style.display = "none";
+  if (barrierCalcOptions) barrierCalcOptions.style.display = "none";
+  if (contentRecommendOptions) contentRecommendOptions.style.display = "none";
   if (resultLabel) resultLabel.innerHTML = "";
   attachActionSectionToLayout(null);
 }
@@ -2202,6 +2724,8 @@ function toggleCalculationType() {
   let rollCountEstimateOptions = document.getElementById("rollCountEstimate_options");
   let containerLoadOptions = document.getElementById("containerLoad_options");
   let capacityStatsOptions = document.getElementById("capacityStats_options");
+  let barrierCalcOptions = document.getElementById("barrierCalc_options");
+  let contentRecommendOptions = document.getElementById("contentRecommend_options");
   let homePage = document.getElementById("home_page");
   let moduleHeader = document.getElementById("module_header");
   let moduleTitle = document.getElementById("module_title");
@@ -2215,6 +2739,8 @@ function toggleCalculationType() {
   rollCountEstimateOptions.style.display = "none";
   if (containerLoadOptions) containerLoadOptions.style.display = "none";
   if (capacityStatsOptions) capacityStatsOptions.style.display = "none";
+  if (barrierCalcOptions) barrierCalcOptions.style.display = "none";
+  if (contentRecommendOptions) contentRecommendOptions.style.display = "none";
 
   if (homePage) homePage.style.display = "none";
   if (moduleHeader) moduleHeader.style.display = "flex";
@@ -2248,6 +2774,15 @@ function toggleCalculationType() {
     if (capacityStatsOptions) capacityStatsOptions.style.display = "block";
     if (moduleTitle) moduleTitle.textContent = "产能统计";
     if (moduleTip) moduleTip.textContent = "用于客户快速查看我司主要工序产能，并反推需求量大概需要多少天。";
+  } else if (calculationType === "阻隔性能") {
+    if (barrierCalcOptions) barrierCalcOptions.style.display = "block";
+    if (moduleTitle) moduleTitle.textContent = "阻隔性能";
+    if (moduleTip) moduleTip.textContent = "选择材料材质和厚度后，估算组合包装的阻氧、阻湿和功能表现。";
+  } else if (calculationType === "内容物推荐") {
+    if (contentRecommendOptions) contentRecommendOptions.style.display = "block";
+    if (moduleTitle) moduleTitle.textContent = "内容物推荐";
+    if (moduleTip) moduleTip.textContent = "根据客户内容物和关注重点，快速推荐合适的包装材料结构。";
+    renderContentRecommendations();
   } else {
     showHomePage();
   }
@@ -2569,7 +3104,7 @@ function calculateFinalPrice() {
     }
 
     // 版费摊销（显示用）
-    let plateFeePerKg = salesWeightKg > 0 ? (plateFeeTotal / salesWeightKg) : 0;
+    let plateFeePerKg = totalWeightKg > 0 ? (plateFeeTotal / totalWeightKg) : 0;
 
     // 4) 汇总（含税/币种）
     let taxMultiplierBag = document.getElementById('tax_checkbox').checked ? 1.13 : 1.0;
@@ -3113,6 +3648,23 @@ function calculateFinalPrice() {
     });
     return;
   }
+
+  /* -----------------------------
+     D7. 阻隔性能（按结构层估算 OTR / WVTR）
+  ----------------------------- */
+  else if (calculationType === "阻隔性能") {
+    renderBarrierResult(getBarrierInputLayers(), '');
+    return;
+  }
+
+  /* -----------------------------
+     D8. 内容物推荐（刷新推荐卡片）
+  ----------------------------- */
+  else if (calculationType === "内容物推荐") {
+    renderContentRecommendations();
+    renderPlainResultMessage('已根据当前内容物和客户关注重点刷新推荐结构。点击推荐卡片里的“带入阻隔测算”可查看该结构的阻隔数据。');
+    return;
+  }
 } 
 
 function animateCapacityNumbers() {
@@ -3200,7 +3752,7 @@ window.onload = function () {
 </script>
 
 <script>
-const APP_VERSION = '20260312-1';
+const APP_VERSION = '20260702-barrier-1';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
