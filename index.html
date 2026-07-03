@@ -2333,8 +2333,8 @@ function renderContentRecommendations() {
       '<p><b>' + data.title + '</b>：' + plan.reason + '</p>' +
       '<ul>' + risks + '</ul>' +
       '<div class="barrier-tabs">' +
-        '<div class="barrier-stat">阻氧 OTR<strong>' + barrier.otr.toFixed(3) + '</strong></div>' +
-        '<div class="barrier-stat">阻湿 WVTR<strong>' + barrier.wvtr.toFixed(3) + '</strong></div>' +
+        '<div class="barrier-stat">阻氧 OTR<strong>' + barrier.otr.toFixed(3) + ' cc/(m²·day·atm)</strong></div>' +
+        '<div class="barrier-stat">阻湿 WVTR<strong>' + barrier.wvtr.toFixed(3) + ' g/(m²·day)</strong></div>' +
         '<div class="barrier-stat">结构克重<strong>' + barrier.gsm.toFixed(1) + ' g/m²</strong></div>' +
       '</div>' +
       '<p>主要功能：' + (barrier.features.join('、') || '常规保护') + '</p>' +
