@@ -41,6 +41,18 @@
             margin-bottom: 5px;
         }
 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         input[type="text"],
         select {
             width: calc(100% - 10px);
@@ -168,13 +180,15 @@
             margin-bottom: 12px;
         }
 
-        .calc-card h3 {
+        .calc-card-title {
+            display: block;
             margin: 0 0 8px;
             font-size: 20px;
             color: #111827;
         }
 
-        .calc-card p {
+        .calc-card-desc {
+            display: block;
             margin: 0;
             font-size: 13px;
             line-height: 1.7;
@@ -918,50 +932,50 @@
         <div class="home-grid">
           <button class="calc-card" type="button" onclick="selectCalculationType('制袋')">
             <span class="card-tag">Pricing</span>
-            <h3>制袋报价</h3>
-            <p>适用于成品袋报价，包含袋型、尺寸、印刷、结构层、附加项、贸易条款等计算。</p>
+            <span class="calc-card-title">制袋报价</span>
+            <span class="calc-card-desc">适用于成品袋报价，包含袋型、尺寸、印刷、结构层、附加项、贸易条款等计算。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('卷膜')">
             <span class="card-tag">Film Roll</span>
-            <h3>卷膜报价</h3>
-            <p>适用于卷膜报价，可按卷规格或按尺寸进行核算，并保留原有卷膜逻辑。</p>
+            <span class="calc-card-title">卷膜报价</span>
+            <span class="calc-card-desc">适用于卷膜报价，可按卷规格或按尺寸进行核算，并保留原有卷膜逻辑。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('卷膜张数')">
             <span class="card-tag">Sheet Count</span>
-            <h3>卷膜张数</h3>
-            <p>用于根据袋子尺寸与膜规格估算可出的张数，便于做快速换算与计划判断。</p>
+            <span class="calc-card-title">卷膜张数</span>
+            <span class="calc-card-desc">用于根据袋子尺寸与膜规格估算可出的张数，便于做快速换算与计划判断。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('卷数估算')">
             <span class="card-tag">Roll Estimate</span>
-            <h3>卷数估算</h3>
-            <p>根据总重量、展开宽度、每卷长度与结构克重估算卷数，适合排产与出货前判断。</p>
+            <span class="calc-card-title">卷数估算</span>
+            <span class="calc-card-desc">根据总重量、展开宽度、每卷长度与结构克重估算卷数，适合排产与出货前判断。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('装柜估算')">
             <span class="card-tag">Container Load</span>
-            <h3>装柜估算</h3>
-            <p>按集装箱最大承重量，快速估算 20GP / 40GP / 40HQ 大概能装多少个袋子或多少卷卷膜。</p>
+            <span class="calc-card-title">装柜估算</span>
+            <span class="calc-card-desc">按集装箱最大承重量，快速估算 20GP / 40GP / 40HQ 大概能装多少个袋子或多少卷卷膜。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('产能统计')">
             <span class="card-tag">Capacity</span>
-            <h3>产能统计</h3>
-            <p>集中展示印刷、复合、分切、制袋、封管及月产能数据，并支持按客户需求快速反推预计所需天数。</p>
+            <span class="calc-card-title">产能统计</span>
+            <span class="calc-card-desc">集中展示印刷、复合、分切、制袋、封管及月产能数据，并支持按客户需求快速反推预计所需天数。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('阻隔性能')">
             <span class="card-tag">Barrier</span>
-            <h3>阻隔性能</h3>
-            <p>选择材料结构和厚度后，估算组合包装的阻氧、阻湿、遮光与适用功能，便于客户现场问答。</p>
+            <span class="calc-card-title">阻隔性能</span>
+            <span class="calc-card-desc">选择材料结构和厚度后，估算组合包装的阻氧、阻湿、遮光与适用功能，便于客户现场问答。</span>
           </button>
 
           <button class="calc-card" type="button" onclick="selectCalculationType('内容物推荐')">
             <span class="card-tag">Recommend</span>
-            <h3>内容物推荐</h3>
-            <p>按客户要装的产品、保存条件和关注重点，快速推荐常用材料结构与厚度，并可带入阻隔测算。</p>
+            <span class="calc-card-title">内容物推荐</span>
+            <span class="calc-card-desc">按客户要装的产品、保存条件和关注重点，快速推荐常用材料结构与厚度，并可带入阻隔测算。</span>
           </button>
         </div>
       </div>
@@ -994,7 +1008,7 @@
       <div id="bagging_options">
         <div class="module-hero">
           <span class="eyebrow">Bag Quote</span>
-          <h3>制袋报价</h3>
+          <span class="calc-card-title">制袋报价</span>
           <p>适用于客户按成品袋尺寸、结构层、附加项和报价条件快速测算单价与总价。</p>
         </div>
 
@@ -1166,6 +1180,7 @@
             <b>CIF</b>
           </label>
           <span id="cif_input_wrapper" style="display: none;">
+            <label for="cif_input" class="sr-only">CIF总额</label>
             <input type="number" id="cif_input" placeholder="CIF总额">
           </span>
           <br>
@@ -1212,6 +1227,7 @@
             <b>损耗率</b>
           </label>
           <span id="loss_input_wrapper" style="display: none;">
+            <label for="loss_input" class="sr-only">损耗率</label>
             <input type="number" id="loss_input" placeholder="损耗率%" min="0" step="0.01">
           </span>
           <br>
@@ -1226,7 +1242,7 @@
       <div id="filmprice_options" style="display: none;">
         <div class="module-hero">
           <span class="eyebrow">Roll Film Quote</span>
-          <h3>卷膜报价</h3>
+          <span class="calc-card-title">卷膜报价</span>
           <p>支持按卷规格报价，也支持客户只给袋子尺寸时换算卷膜需求，适合快速应对不同询盘场景。</p>
         </div>
 
@@ -1250,35 +1266,35 @@
           <input type="text" id="film_length" placeholder="例如 3000" value="3000">
           <br>
 
-          <label><b>卷数（数量）：</b></label>
+          <label for="film_count"><b>卷数（数量）：</b></label>
           <input type="number" id="film_count" value="15">
           <br>
         </div>
 
         <!-- A2）按尺寸（新增输入） -->
         <div id="roll_mode_size" style="display:none">
-          <label><b>成品袋宽（cm）：</b></label>
+          <label for="roll_bag_width_cm"><b>成品袋宽（cm）：</b></label>
           <input type="text" id="roll_bag_width_cm" placeholder="例如 12">
           <br>
 
-          <label><b>成品袋高（cm）：</b></label>
+          <label for="roll_bag_height_cm"><b>成品袋高（cm）：</b></label>
           <input type="text" id="roll_bag_height_cm" placeholder="例如 18">
           <br>
 
-          <label><b>底（cm）：</b></label>
+          <label for="roll_bag_bottom_cm"><b>底（cm）：</b></label>
           <label class="notice">无底请输入0（这里输入的是“单边底”，程序内部会×2）</label>
           <input type="text" id="roll_bag_bottom_cm" placeholder="例如 4.75">
           <br>
 
-          <label><b>数量（个）：</b></label>
+          <label for="roll_bag_qty"><b>数量（个）：</b></label>
           <input type="number" id="roll_bag_qty" placeholder="例如 100000">
           <br>
 
-          <label><b>侧封/搭接余量（cm）：</b></label>
+          <label for="roll_side_allow_cm"><b>侧封/搭接余量（cm）：</b></label>
           <input type="text" id="roll_side_allow_cm" value="0">
           <br>
 
-          <label><b>上下封口/切刀余量（cm）：</b></label>
+          <label for="roll_tb_allow_cm"><b>上下封口/切刀余量（cm）：</b></label>
           <input type="text" id="roll_tb_allow_cm" value="0">
           <br>
         </div>
@@ -1366,6 +1382,7 @@
             <b>CIF</b>
           </label>
           <span id="rf_cif_input_wrapper" style="display: none;">
+            <label for="rf_cif_input" class="sr-only">CIF总额</label>
             <input type="number" id="rf_cif_input" placeholder="CIF总额">
           </span>
           <br>
@@ -1412,6 +1429,7 @@
             <b>损耗率</b>
           </label>
           <span id="rf_loss_input_wrapper" style="display: none;">
+            <label for="rf_loss_input" class="sr-only">损耗率</label>
             <input type="number" id="rf_loss_input" placeholder="损耗率%" min="0" step="0.01">
           </span>
           <br>
@@ -1426,7 +1444,7 @@
       <div id="finalSheets_options" style="display: none;">
         <div class="module-hero">
           <span class="eyebrow">Sheet Count</span>
-          <h3>卷膜张数</h3>
+          <span class="calc-card-title">卷膜张数</span>
           <p>用于客户提供卷膜宽度和长度时，快速估算大约可切出多少张袋子，便于做产量与订单核对。</p>
         </div>
 
@@ -1471,7 +1489,7 @@
       <div id="rollCountEstimate_options" style="display: none;">
         <div class="module-hero">
           <span class="eyebrow">Roll Count</span>
-          <h3>卷数估算</h3>
+          <span class="calc-card-title">卷数估算</span>
           <p>用于根据总重量、卷膜展开宽度、每卷长度和材料结构，快速估算大约可以分成多少卷。</p>
         </div>
 
@@ -1872,7 +1890,6 @@ const SLITTING_COST_PER_KG      = 1000 / 1000;   // 1 元/kg
 const ROLL_PRINTING_COST_PER_KG = PRINTING_COST_PER_KG;        // 6 元/kg
 const ROLL_LAM_AUTO_COST_PER_KG = 3000 / 1000;                 // 3 元/kg（复合+自动包装）
 const ROLL_LAM_AL_COST_PER_KG   = LAMINATION_AL_COST_PER_KG;   // 10 元/kg（卷膜 AL）
-const ROLL_SLITTING_COST_PER_KG = SLITTING_COST_PER_KG;        // 1 元/kg
 
 // --- 卷膜涂胶膜成本（元/㎡）：直接按图片表格中的“平方成本”计入 ---
 const ROLL_COATING_COST_PER_M2 = {
@@ -1998,6 +2015,7 @@ const contentRecommendationData = {
 };
 
 // --- 材料密度（g/cm³） ---
+// noinspection JSNonASCIINames,SpellCheckingInspection
 let materialDensity = {
   "BOPP1.9C": 0.92,
   "BOPP2.3c": 0.9,
@@ -2037,7 +2055,6 @@ let materialDensity = {
   "PE膜筒": 0.92,
   "POF": 1,
   "PVC": 1.4,
-  "VMPET": 1.38,
   "佛塑PA": 1.14,
   "蒸煮CP": 0.91,
   "四级液体蒸煮cp": 0.91,
@@ -2061,6 +2078,7 @@ let materialDensity = {
 };
 
 // --- 材料单价（元/kg） ---
+// noinspection JSNonASCIINames,SpellCheckingInspection
 let materialCost = {
   "BOPP1.9C": 11,
   "BOPP2.3c": 10.6,
@@ -2072,7 +2090,7 @@ let materialCost = {
   "OP铝1.8c": 14.9,
   "OP铝2.5c": 14.5,
   "KPET": 16.1,
-  "VMPET": 10.1,
+  "VMPET": 8.95,
   "PET不易揭膜2.2C，2.5C,3C": 13,
   "PET扭结白膜1.9-2.3": 10.3,
   "PET扭结铝膜1.9-2.3": 11.8,
@@ -2100,7 +2118,6 @@ let materialCost = {
   "PE膜筒": 11.7,
   "POF": 12.1,
   "PVC": 12,
-  "VMPET": 8.95,
   "佛塑PA": 22,
   "蒸煮CP": 28,
   "四级液体蒸煮cp": 19.1,
@@ -2190,7 +2207,6 @@ function calculateBarrierFromLayers(layers) {
 
   const otr = oxygenResistance > 0 ? 1 / oxygenResistance : 0;
   const wvtr = moistureResistance > 0 ? 1 / moistureResistance : 0;
-  const features = Array.from(featureSet);
   const hasFoil = layers.some(function(layer) { return (layer.material || '').includes('AL') || (layer.material || '').includes('铝'); });
   const hasMetalized = layers.some(function(layer) { return (layer.material || '').includes('VMPET') || (layer.material || '').includes('铝'); });
   if (hasFoil || hasMetalized) featureSet.add('遮光');
@@ -3009,7 +3025,7 @@ function calculateFinalPrice() {
     let plateFeeManual = parseFloat(document.getElementById('plate_fee_input').value || "0");
     let plateFeeCurrency = document.getElementById('plate_fee_currency').value;
 
-    let plateFeeTotal = 0;
+    let plateFeeTotal;
     if (printModeBag === "none") {
       plateFeeTotal = 0;
     } else {
@@ -3136,8 +3152,6 @@ function calculateFinalPrice() {
         { label: '制袋总额', value: amountLabel + totalAmount.toFixed(2), highlight: true }
       ]
     });
-
-    return;
   }
 
   /* -----------------------------
@@ -3193,7 +3207,7 @@ function calculateFinalPrice() {
     let plateFeeManual = parseFloat(document.getElementById("plate_fee_input1").value || "0");
     let plateFeeCurrency = document.getElementById("plate_fee_currency1").value;
 
-    let plateFeeTotal = 0;
+    let plateFeeTotal;
     if (printModeRoll === "none") {
       plateFeeTotal = 0;
     } else {
@@ -3209,13 +3223,13 @@ function calculateFinalPrice() {
     // 涂胶膜选项：如果选择了涂胶膜，按你的规则做 15% 增重修正
     // 计价用总重量 = 原结构重量 ÷ 1.15
     const coatingSelectVal = document.getElementById("rf_coating_select")?.value || "";
-    let coatingCostPerM2 = ROLL_COATING_COST_PER_M2[coatingSelectVal] || 0;
+    const coatingCostPerM2 = ROLL_COATING_COST_PER_M2[coatingSelectVal] || 0;
     const hasRollCoating = coatingCostPerM2 > 0;
     const coatingWeightDivisor = hasRollCoating ? 1.15 : 1;
 
     // unitWeightKgPerM2：每平方米结构重量（kg/㎡）
     // totalWeightKg：本次输入条件下的整批总重量（kg）
-    let unitWeightKgPerM2 = density.reduce((sumKg, d, idx) => {
+    const unitWeightKgPerM2 = density.reduce((sumKg, d, idx) => {
       const t = thickness[idx];
       if (isNaN(d) || isNaN(t)) return sumKg;
       const gsm = t * d; // g/m²
@@ -3226,12 +3240,11 @@ function calculateFinalPrice() {
     // salesWeightKg：用于对外报价、单价摊销和装柜估算的成品重量口径
     // totalWeightKg：用于内部材料/工序成本的基材重量口径；有涂胶时按你的规则 ÷1.15
     const salesWeightKg = rawTotalWeightKg;
-    let totalWeightKg = rawTotalWeightKg / coatingWeightDivisor;
+    const totalWeightKg = rawTotalWeightKg / coatingWeightDivisor;
 
     // -------- 2) 材料成本 --------
     // 先算每平方米材料重量，再得到单位kg材料成本；
     // 最后如果要总金额，再乘整批总重量。
-    let materialCostPerKg = 0;
     let materialCostPerM2 = 0;
 
     density.forEach((d, idx) => {
@@ -3243,8 +3256,7 @@ function calculateFinalPrice() {
       materialCostPerM2 += layerWeightKgPerM2 * costPerKg;
     });
 
-    materialCostPerKg = unitWeightKgPerM2 > 0 ? (materialCostPerM2 / unitWeightKgPerM2) : 0;
-    let materialCostTotal = materialCostPerKg * totalWeightKg;
+    const materialCostPerKg = unitWeightKgPerM2 > 0 ? (materialCostPerM2 / unitWeightKgPerM2) : 0;
 
     // -------- 3) 卷膜工序成本（元）--------
     // 按“对应层重量”计费：
@@ -3382,8 +3394,6 @@ function calculateFinalPrice() {
         { label: '卷膜总额', value: amountLabel + totalAmountShow.toFixed(2), highlight: true }
       ]
     });
-
-    return;
   }
 
   /* -----------------------------
@@ -3426,7 +3436,6 @@ function calculateFinalPrice() {
       { label: '预计总张数/个数', value: totalPieces.toLocaleString(), highlight: true }
     ]
   });
-  return;
 }
 
   /* -----------------------------
@@ -3482,7 +3491,6 @@ function calculateFinalPrice() {
       { label: '预计卷数', value: rollCount.toFixed(2) + ' 卷', highlight: true }
     ]
   });
-  return;
 }
 
   /* -----------------------------
@@ -3587,7 +3595,6 @@ function calculateFinalPrice() {
           { label: '预计可装', value: rollCount.toLocaleString() + ' 卷', highlight: true }
         ]
       });
-      return;
     }
   }
 
@@ -3646,7 +3653,6 @@ function calculateFinalPrice() {
       ],
       footnote: '提示：这是理论产能反推结果，正式回复交期时建议再结合排期、熟化、检验与装柜安排综合判断。'
     });
-    return;
   }
 
   /* -----------------------------
@@ -3654,7 +3660,6 @@ function calculateFinalPrice() {
   ----------------------------- */
   else if (calculationType === "阻隔性能") {
     renderBarrierResult(getBarrierInputLayers(), '');
-    return;
   }
 
   /* -----------------------------
@@ -3663,7 +3668,6 @@ function calculateFinalPrice() {
   else if (calculationType === "内容物推荐") {
     renderContentRecommendations();
     renderPlainResultMessage('已根据当前内容物和客户关注重点刷新推荐结构。点击推荐卡片里的“带入阻隔测算”可查看该结构的阻隔数据。');
-    return;
   }
 } 
 
@@ -3758,15 +3762,15 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION);
-      reg.update();
+      await reg.update();
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });
 
-      document.addEventListener('visibilitychange', () => {
+      document.addEventListener('visibilitychange', async () => {
         if (document.visibilityState === 'visible') {
-          reg.update();
+          await reg.update();
         }
       });
     } catch (e) {
