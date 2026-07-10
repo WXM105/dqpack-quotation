@@ -1353,7 +1353,7 @@
           <h3 style="margin: 6px 0;">卷膜 - 附加项</h3>
 
           <label for="rf_coating_select"><b>涂胶膜选项</b></label>
-          <select id="rf_coating_select">
+          <select id="rf_coating_select" onchange="disableCustomCoatingRoll()">
             <option value="">— 不计涂胶 —</option>
             <option value="AL_10N">AL涂胶膜 ≥10N，0.76元/㎡</option>
             <option value="AL_7N">AL涂胶膜 ≥7N，0.67元/㎡</option>
@@ -1362,6 +1362,42 @@
             <option value="PET_7N">PET涂胶膜 ≥7N，0.72元/㎡</option>
             <option value="PET_5N">PET涂胶膜 ≥5N，0.63元/㎡</option>
           </select>
+          <br>
+
+          <label>
+            <input type="checkbox" id="rf_custom_coating_checkbox" onchange="toggleCustomCoatingRoll()">
+            <b>自定义涂胶</b>
+          </label>
+          <div id="rf_custom_coating_wrapper" style="display: none;" oninput="updateCustomCoatingRollPreview()" onchange="updateCustomCoatingRollPreview()">
+            <label for="rf_custom_dry_glue"><b>干基涂布 g/㎡</b></label>
+            <input type="number" id="rf_custom_dry_glue" value="3.7" step="0.01" min="0">
+
+            <label for="rf_custom_concentration"><b>工作浓度 %</b></label>
+            <input type="number" id="rf_custom_concentration" value="37" step="0.1" min="0">
+
+            <label for="rf_custom_glue_price"><b>胶水单价 元/kg</b></label>
+            <input type="number" id="rf_custom_glue_price" value="130" step="0.01" min="0">
+
+            <label for="rf_custom_solvent"><b>溶剂</b></label>
+            <select id="rf_custom_solvent" onchange="syncCustomCoatingSolventPrice()">
+              <option value="ethyl_acetate" data-price="6.5">乙酸乙酯 6.5元/kg</option>
+              <option value="mek" data-price="8.5">丁酮 MEK 8.5元/kg</option>
+              <option value="toluene" data-price="7">甲苯 7元/kg</option>
+              <option value="ipa" data-price="7.5">异丙醇 IPA 7.5元/kg</option>
+              <option value="none" data-price="0">无溶剂 0元/kg</option>
+            </select>
+
+            <label for="rf_custom_solvent_price"><b>溶剂单价 元/kg</b></label>
+            <input type="number" id="rf_custom_solvent_price" value="6.5" step="0.01" min="0">
+
+            <label for="rf_custom_machine_power"><b>北人机功率 kW</b></label>
+            <input type="number" id="rf_custom_machine_power" value="80" step="1" min="0">
+
+            <label for="rf_custom_output_m2_hour"><b>每小时涂布㎡</b></label>
+            <input type="number" id="rf_custom_output_m2_hour" value="1200" step="10" min="0">
+
+            <div id="rf_custom_coating_result" class="sub-tip" style="margin: 4px 0 10px;"></div>
+          </div>
           <br>
 
           <label for="rf_fob_select"><b>FOB始发港（卷膜）</b></label>
@@ -1900,6 +1936,16 @@ const ROLL_COATING_COST_PER_M2 = {
   "PET_10N": 0.81,
   "PET_7N": 0.72,
   "PET_5N": 0.63
+};
+
+// --- 自定义涂胶默认参数 ---
+const CUSTOM_COATING_DEFAULTS = {
+  electricityPrice: 0.8,        // 高峰电价：0.8元/度
+  monthlyWagePerWorker: 10000,  // 每人每月工资
+  workersPerShift: 2,           // 每班2人
+  shifts: 3,                    // 3班
+  workDaysPerMonth: 30,         // 按30天
+  hoursPerDay: 24               // 按24小时连续生产
 };
 
 // --- 动态层输入缓存（由 createLayerSelection / createLayerSelection2 填充） ---
@@ -2499,6 +2545,93 @@ function toggleCIFRoll() {
   const checkbox = document.getElementById('rf_cif_checkbox');
   if (!wrapper || !checkbox) return;
   wrapper.style.display = checkbox.checked ? 'inline-block' : 'none';
+}
+
+function syncCustomCoatingSolventPrice() {
+  const solventSelect = document.getElementById('rf_custom_solvent');
+  const solventPriceInput = document.getElementById('rf_custom_solvent_price');
+  if (!solventSelect || !solventPriceInput) return;
+  const selectedOption = solventSelect.options[solventSelect.selectedIndex];
+  solventPriceInput.value = selectedOption?.dataset?.price || '0';
+  updateCustomCoatingRollPreview();
+}
+
+function toggleCustomCoatingRoll() {
+  const wrapper = document.getElementById('rf_custom_coating_wrapper');
+  const checkbox = document.getElementById('rf_custom_coating_checkbox');
+  const coatingSelect = document.getElementById('rf_coating_select');
+  if (!wrapper || !checkbox) return;
+  wrapper.style.display = checkbox.checked ? 'block' : 'none';
+  if (checkbox.checked && coatingSelect) coatingSelect.value = '';
+  updateCustomCoatingRollPreview();
+}
+
+function disableCustomCoatingRoll() {
+  const coatingSelect = document.getElementById('rf_coating_select');
+  const checkbox = document.getElementById('rf_custom_coating_checkbox');
+  if (!coatingSelect || !checkbox || !coatingSelect.value) return;
+  checkbox.checked = false;
+  toggleCustomCoatingRoll();
+}
+
+function calculateCustomCoatingRollCost() {
+  const checkbox = document.getElementById('rf_custom_coating_checkbox');
+  if (!checkbox || !checkbox.checked) return { enabled: false, costPerM2: 0 };
+
+  const dryGlueGsm = parseFloat(document.getElementById('rf_custom_dry_glue')?.value || '0');
+  const concentrationPercent = parseFloat(document.getElementById('rf_custom_concentration')?.value || '0');
+  const gluePricePerKg = parseFloat(document.getElementById('rf_custom_glue_price')?.value || '0');
+  const solventPricePerKg = parseFloat(document.getElementById('rf_custom_solvent_price')?.value || '0');
+  const solventKey = document.getElementById('rf_custom_solvent')?.value || 'ethyl_acetate';
+  const machinePowerKw = parseFloat(document.getElementById('rf_custom_machine_power')?.value || '0');
+  const outputM2PerHour = parseFloat(document.getElementById('rf_custom_output_m2_hour')?.value || '0');
+
+  if (dryGlueGsm <= 0 || concentrationPercent <= 0 || gluePricePerKg < 0 || outputM2PerHour <= 0) {
+    return { enabled: true, valid: false, costPerM2: 0 };
+  }
+
+  const concentration = concentrationPercent / 100;
+  const glueCost = dryGlueGsm / 1000 * gluePricePerKg;
+  const solventKgM2 = solventKey === 'none' ? 0 : dryGlueGsm * (1 - concentration) / concentration / 1000;
+  const solventCost = solventKgM2 * solventPricePerKg;
+  const electricityCost = machinePowerKw * CUSTOM_COATING_DEFAULTS.electricityPrice / outputM2PerHour;
+  const laborHourlyCost = CUSTOM_COATING_DEFAULTS.monthlyWagePerWorker *
+    CUSTOM_COATING_DEFAULTS.workersPerShift *
+    CUSTOM_COATING_DEFAULTS.shifts /
+    CUSTOM_COATING_DEFAULTS.workDaysPerMonth /
+    CUSTOM_COATING_DEFAULTS.hoursPerDay;
+  const laborCost = laborHourlyCost / outputM2PerHour;
+  const costPerM2 = glueCost + solventCost + electricityCost + laborCost;
+
+  return {
+    enabled: true,
+    valid: true,
+    costPerM2,
+    glueCost,
+    solventCost,
+    electricityCost,
+    laborCost
+  };
+}
+
+function updateCustomCoatingRollPreview() {
+  const result = document.getElementById('rf_custom_coating_result');
+  if (!result) return;
+  const detail = calculateCustomCoatingRollCost();
+  if (!detail.enabled) {
+    result.textContent = '';
+    return;
+  }
+  if (!detail.valid) {
+    result.textContent = '请填写干基涂布、工作浓度、胶水单价和每小时涂布㎡';
+    return;
+  }
+  result.textContent =
+    '自定义涂胶：' + detail.costPerM2.toFixed(3) + '元/㎡' +
+    '（胶水' + detail.glueCost.toFixed(3) +
+    '，溶剂' + detail.solventCost.toFixed(3) +
+    '，电费' + detail.electricityCost.toFixed(3) +
+    '，人工' + detail.laborCost.toFixed(3) + '）';
 }
 
 function toggleLossRoll() {
@@ -3220,10 +3353,13 @@ function calculateFinalPrice() {
     }
 
     // -------- 1) 先分清“单位口径”和“整批口径” --------
-    // 涂胶膜选项：如果选择了涂胶膜，按你的规则做 15% 增重修正
+    // 涂胶膜选项：原有下拉或自定义涂胶，都按你的规则做 15% 增重修正
     // 计价用总重量 = 原结构重量 ÷ 1.15
     const coatingSelectVal = document.getElementById("rf_coating_select")?.value || "";
-    const coatingCostPerM2 = ROLL_COATING_COST_PER_M2[coatingSelectVal] || 0;
+    const customCoatingDetail = calculateCustomCoatingRollCost();
+    const coatingCostPerM2 = (customCoatingDetail.enabled && customCoatingDetail.valid)
+      ? customCoatingDetail.costPerM2
+      : (ROLL_COATING_COST_PER_M2[coatingSelectVal] || 0);
     const hasRollCoating = coatingCostPerM2 > 0;
     const coatingWeightDivisor = hasRollCoating ? 1.15 : 1;
 
@@ -3730,6 +3866,7 @@ window.onload = function () {
   toggleLossBag();
   toggleCIFRoll();
   toggleLossRoll();
+  toggleCustomCoatingRoll();
   togglePrintFields('bag');
   togglePrintFields('roll');
   toggleRollCalcMode();
